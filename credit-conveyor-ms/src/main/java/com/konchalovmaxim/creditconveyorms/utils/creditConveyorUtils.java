@@ -9,16 +9,14 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.Period;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Properties;
+import java.util.*;
 
 public abstract class creditConveyorUtils {
 
     private static final int INSURANCE_ENABLED = 2;
     private static final int SALARY_CLIENT = 3;
 
-    public static BigDecimal getStandardRate(){
+    public static BigDecimal getProperty(String propName){
         File file = new File("credit-conveyor-ms.properties");
         Properties properties = new Properties();
         try {
@@ -26,8 +24,9 @@ public abstract class creditConveyorUtils {
         } catch (IOException e) {
             e.printStackTrace();//TODO добавить логгирование сюда
         }
-        return new BigDecimal(properties.getProperty("standardRate"));
+        return new BigDecimal(properties.getProperty(propName));
     }
+
 
     public static int getAge(LocalDate birthdate){
         LocalDate currentTime = LocalDate.now();
@@ -36,7 +35,7 @@ public abstract class creditConveyorUtils {
     }
 
     private static BigDecimal calculateRate(Boolean isSalaryClient, Boolean isInsuranceEnabled, BigDecimal amount, Integer term){
-        BigDecimal rate = getStandardRate();
+        BigDecimal rate = getProperty("standardRate");
         if (isInsuranceEnabled){
             rate = rate.subtract(BigDecimal.valueOf(INSURANCE_ENABLED));
         }
@@ -44,11 +43,12 @@ public abstract class creditConveyorUtils {
         if (isSalaryClient){
            rate = rate.subtract(BigDecimal.valueOf(SALARY_CLIENT));
         }
+//TODO а вообще нужно ли в этом месте менять ставку?
 
-        rate = rate.add(BigDecimal.valueOf((0.5 * (term / 6))));//накидывает 0.5% за каждые 6 месяцев срока
-
-        BigDecimal rateDowngradeByAmount = amount.divide(BigDecimal.valueOf(300000), 0, RoundingMode.FLOOR).multiply(BigDecimal.valueOf(0.5));
-        rate = rate.subtract(rateDowngradeByAmount);//скидывает 0.5% за каждые 300.000 суммы
+//        rate = rate.add(BigDecimal.valueOf((0.5 * (term / 6))));//накидывает 0.5% за каждые 6 месяцев срока
+//
+//        BigDecimal rateDowngradeByAmount = amount.divide(BigDecimal.valueOf(300000), 0, RoundingMode.FLOOR).multiply(BigDecimal.valueOf(0.5));
+//        rate = rate.subtract(rateDowngradeByAmount);//скидывает 0.5% за каждые 300.000 суммы
 
         return rate;
     }
@@ -141,13 +141,51 @@ public abstract class creditConveyorUtils {
     creditDTO.setRate(scoring(scoringDataDTO));
 
     if (creditDTO.getRate() != null){
-        BigDecimal P = creditDTO.getRate().divide(BigDecimal.valueOf(100), 10, RoundingMode.HALF_UP).divide(BigDecimal.valueOf(12), 10, RoundingMode.HALF_DOWN);
+        BigDecimal P = creditDTO.getRate().divide(BigDecimal.valueOf(1200), 10, RoundingMode.HALF_DOWN);//деление на 100 - получение процентов, на 12 - определение, какую часть от года состаялет
 
-        BigDecimal monthlyPayment = creditDTO.getAmount().multiply(P.add(P.divide(P.add(BigDecimal.valueOf(1)).pow(creditDTO.getTerm()).subtract(BigDecimal.valueOf(1)), 10, RoundingMode.HALF_UP)));
+        //TODO Убрать при успешном использовании другого метода
+
+        //старый способ расчета
+        //BigDecimal monthlyPayment = creditDTO.getAmount().multiply(P.add(P.divide(P.add(BigDecimal.valueOf(1)).pow(creditDTO.getTerm()).subtract(BigDecimal.valueOf(1)), 10, RoundingMode.HALF_UP)));
+
+        BigDecimal annuitetCoef = P.multiply(BigDecimal.valueOf(1).add(P).pow(creditDTO.getTerm())).divide(BigDecimal.valueOf(1).add(P).pow(creditDTO.getTerm()).subtract(BigDecimal.valueOf(1)), 10, RoundingMode.HALF_UP);
+
+        BigDecimal monthlyPayment = annuitetCoef.multiply(creditDTO.getAmount());
 
         creditDTO.setMonthlyPayment(monthlyPayment.setScale(2, RoundingMode.HALF_UP));
 
-        //TODO добавить расчет ежемесячных платежей
+        BigDecimal psk = monthlyPayment.multiply(BigDecimal.valueOf(creditDTO.getTerm()));
+
+        if (creditDTO.getIsInsuranceEnabled()){
+            psk = psk.add(getProperty("InsuranceCost"));
+        }
+
+        creditDTO.setPsk(psk);
+
+        //TODO  районе 100р получается остаток после всех еежемесячных платежей
+
+        List<PaymentScheduleElement> paymentSchedule = new ArrayList<>();
+
+        BigDecimal remainder = creditDTO.getAmount();
+        for (int i = 1; i <= creditDTO.getTerm(); i++){
+            PaymentScheduleElement element = new PaymentScheduleElement();
+            element.setNumber(i);
+            element.setTotalPayment(monthlyPayment);
+            element.setDate(LocalDate.now().plusMonths(i));
+
+            Calendar calendar = new GregorianCalendar(element.getDate().getYear(), element.getDate().getMonth().getValue(), element.getDate().getDayOfMonth());
+
+            int countOfDays = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);//TODO либо оставить такое определение количества дней, либо просто чередование 30 и 31
+
+            element.setInterestPayment(remainder.multiply(creditDTO.getRate().divide(BigDecimal.valueOf(100), 10, RoundingMode.HALF_UP))
+                                                            .multiply(BigDecimal.valueOf(countOfDays).divide(BigDecimal.valueOf(365), 10, RoundingMode.HALF_UP)));
+            element.setRemainingDebt(element.getTotalPayment().subtract(element.getInterestPayment()));
+            remainder = remainder.subtract(element.getRemainingDebt());
+
+            paymentSchedule.add(element);
+        }
+
+        creditDTO.setPaymentSchedule(paymentSchedule);
 
         return creditDTO;
     }
