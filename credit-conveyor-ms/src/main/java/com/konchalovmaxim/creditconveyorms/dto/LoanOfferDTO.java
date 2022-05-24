@@ -1,9 +1,6 @@
 package com.konchalovmaxim.creditconveyorms.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.io.File;
 import java.io.FileReader;
@@ -15,6 +12,8 @@ import java.util.Properties;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode
+@ToString
 public class LoanOfferDTO {
 
     private Long applicationId;
