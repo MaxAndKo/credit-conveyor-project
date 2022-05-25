@@ -65,11 +65,9 @@ public class CreditConveyorService {
                                 loanOfferDTO.getRequestedAmount(),
                                 loanOfferDTO.getTerm()));
 
-            loanOfferDTO.setTotalAmount(loanOfferDTO.getRequestedAmount().add(loanOfferDTO.getRequestedAmount().
-                    multiply(loanOfferDTO.getRate().
-                            divide(new BigDecimal(100), 2, RoundingMode.HALF_DOWN))));
-
             loanOfferDTO.setMonthlyPayment(getMonthlyPayment(loanOfferDTO.getTerm(), loanOfferDTO.getRate(), loanOfferDTO.getRequestedAmount()));
+
+            loanOfferDTO.setTotalAmount(loanOfferDTO.getMonthlyPayment().multiply(BigDecimal.valueOf(loanOfferDTO.getTerm())));
 
             loanOfferDTOS.add(loanOfferDTO);
         }

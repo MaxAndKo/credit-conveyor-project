@@ -43,42 +43,25 @@ class CreditConveyorServiceTest {
 
         List<LoanOfferDTO> expected = new ArrayList<>(4);
         expected.add(new LoanOfferDTO(null, BigDecimal.valueOf(10000),
-                BigDecimal.valueOf(12000.00).setScale(2, RoundingMode.HALF_UP), 6, BigDecimal.valueOf(1765.23),
+                BigDecimal.valueOf(10591.38).setScale(2, RoundingMode.HALF_UP), 6, BigDecimal.valueOf(1765.23),
                 BigDecimal.valueOf(20), false, false));
 
         expected.add(new LoanOfferDTO(null, BigDecimal.valueOf(10000),
-                BigDecimal.valueOf(11800.00).setScale(2, RoundingMode.HALF_UP), 6, BigDecimal.valueOf(1755.25),
+                BigDecimal.valueOf(10531.50).setScale(2, RoundingMode.HALF_UP), 6, BigDecimal.valueOf(1755.25),
                 BigDecimal.valueOf(18), true, false));
 
         expected.add(new LoanOfferDTO(null, BigDecimal.valueOf(10000),
-                BigDecimal.valueOf(11700.00).setScale(2, RoundingMode.HALF_UP), 6, BigDecimal.valueOf(1750.27),
+                BigDecimal.valueOf(10501.62).setScale(2, RoundingMode.HALF_UP), 6, BigDecimal.valueOf(1750.27),
                 BigDecimal.valueOf(17), false, true));
 
         expected.add(new LoanOfferDTO(null, BigDecimal.valueOf(10000),
-                BigDecimal.valueOf(11500.00).setScale(2, RoundingMode.HALF_UP), 6, BigDecimal.valueOf(1740.34),
+                BigDecimal.valueOf(10442.04).setScale(2, RoundingMode.HALF_UP), 6, BigDecimal.valueOf(1740.34),
                 BigDecimal.valueOf(15), true, true));
 
         List<LoanOfferDTO> actual = creditConveyorService.create4Offers(loanApplicationRequestDTO);
 
         assertEquals(expected, actual);
     }
-
-//    @Test
-//    void scoring() {
-//        EmploymentDTO employmentDTO = new EmploymentDTO(EmploymentDTO.EmploymentStatus.САМОЗАНЯТЫЙ,
-//                "123456",BigDecimal.valueOf(100000), EmploymentDTO.Position.МЕНЕДЖЕР,
-//                15, 12);
-//
-//        ScoringDataDTO scoringDataDTO = new ScoringDataDTO(BigDecimal.valueOf(300000), 18,
-//                "Иванов", "Иван", "Иванович", ScoringDataDTO.Gender.МУЖЧИНА,
-//                LocalDate.of(2000,10,10), "1234", "1234",
-//                LocalDate.of(2020, 12, 9), "УФМС Пенза",
-//                ScoringDataDTO.MartialStatus.В_ОТНОШЕНИЯХ, 1, employmentDTO, "account",
-//                true, true);
-//
-//        BigDecimal rate = creditConveyorService.scoring(scoringDataDTO);
-//        Assert.assertEquals( BigDecimal.valueOf(15), rate);
-//    }
 
     @Test
     void createCreditShouldReturnsCorrectCredit() {

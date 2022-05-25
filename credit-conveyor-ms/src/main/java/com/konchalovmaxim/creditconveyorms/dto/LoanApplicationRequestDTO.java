@@ -1,9 +1,6 @@
 package com.konchalovmaxim.creditconveyorms.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -12,6 +9,7 @@ import java.time.LocalDate;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString
 public class LoanApplicationRequestDTO {
     private BigDecimal amount;
     private Integer term;
