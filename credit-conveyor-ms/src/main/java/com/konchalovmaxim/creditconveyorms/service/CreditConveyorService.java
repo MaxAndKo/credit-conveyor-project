@@ -15,7 +15,6 @@ import java.util.*;
 
 import static java.time.Duration.between;
 
-@Validated
 @Service
 public class CreditConveyorService {
 
