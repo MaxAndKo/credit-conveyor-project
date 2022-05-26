@@ -21,4 +21,17 @@ public class CreditDTO {
     private Boolean isInsuranceEnabled;
     private Boolean isSalaryClient;
     private List<PaymentScheduleElement> paymentSchedule;
+
+    @Override
+    public String toString() {
+        return "CreditDTO{" +
+                "amount=" + amount +
+                ", term=" + term +
+                ", monthlyPayment=" + monthlyPayment +
+                ", rate=" + rate +
+                ", psk=" + psk +
+                ", isInsuranceEnabled=" + isInsuranceEnabled +
+                ", isSalaryClient=" + isSalaryClient +
+                '}';
+    }
 }

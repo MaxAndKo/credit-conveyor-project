@@ -3,13 +3,19 @@ package com.konchalovmaxim.creditconveyorms.service;
 import com.konchalovmaxim.creditconveyorms.dto.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 
+import javax.validation.Valid;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.Period;
 import java.util.*;
 
+import static java.time.Duration.between;
+
+@Validated
 @Service
 public class CreditConveyorService {
 
@@ -47,6 +53,7 @@ public class CreditConveyorService {
         for (int i = 0; i < 4; i++){
 
             LoanOfferDTO loanOfferDTO = new LoanOfferDTO();
+            loanOfferDTO.setApplicationId((long) i);
             loanOfferDTO.setRequestedAmount(preScoredRequest.getAmount());
             loanOfferDTO.setTerm(preScoredRequest.getTerm());
             loanOfferDTO.setIsSalaryClient(false);
@@ -74,12 +81,13 @@ public class CreditConveyorService {
         return loanOfferDTOS;
     }
 
+
     private BigDecimal scoring(ScoringDataDTO scoringDataDTO){
         if (scoringDataDTO.getEmployment().getEmploymentStatus() == EmploymentDTO.EmploymentStatus.БЕЗРАБОТНЫЙ)
             return null;
         if (scoringDataDTO.getEmployment().getSalary().multiply(BigDecimal.valueOf(20)).compareTo(scoringDataDTO.getAmount()) < 0)
             return null;
-        Integer age = getAge(scoringDataDTO.getBirthdate());
+        int age = getAge(scoringDataDTO.getBirthdate());
         if  (age < 20 || age > 60)
             return null;
         if (scoringDataDTO.getEmployment().getWorkExperienceTotal() < 12)
@@ -93,34 +101,34 @@ public class CreditConveyorService {
                 scoringDataDTO.getTerm());
 
         if (scoringDataDTO.getEmployment().getEmploymentStatus() == EmploymentDTO.EmploymentStatus.САМОЗАНЯТЫЙ)
-            rate.add(BigDecimal.valueOf(1));
+           rate = rate.add(BigDecimal.valueOf(1));
         else if (scoringDataDTO.getEmployment().getEmploymentStatus() == EmploymentDTO.EmploymentStatus.ВЛАДЕЛЕЦ_БИЗНЕСА)
-            rate.add(BigDecimal.valueOf(3));
+            rate = rate.add(BigDecimal.valueOf(3));
 
         if (scoringDataDTO.getEmployment().getPosition() == EmploymentDTO.Position.МЕНЕДЖЕР)
-            rate.subtract(BigDecimal.valueOf(2));
+            rate = rate.subtract(BigDecimal.valueOf(2));
         else if (scoringDataDTO.getEmployment().getPosition() == EmploymentDTO.Position.ТОП_МЕНЕДЖЕР)
-            rate.subtract(BigDecimal.valueOf(4));
+            rate = rate.subtract(BigDecimal.valueOf(4));
 
         if (scoringDataDTO.getMaritalStatus() == ScoringDataDTO.MartialStatus.В_ОТНОШЕНИЯХ)
-            rate.subtract(BigDecimal.valueOf(3));
+            rate = rate.subtract(BigDecimal.valueOf(3));
         else if (scoringDataDTO.getMaritalStatus() == ScoringDataDTO.MartialStatus.РАЗВЕДЕН)
-            rate.add(BigDecimal.valueOf(1));
+            rate = rate.add(BigDecimal.valueOf(1));
 
         if (scoringDataDTO.getDependentAmount() > 1)
-            rate.add(BigDecimal.valueOf(1));
+            rate = rate.add(BigDecimal.valueOf(1));
 
         if (scoringDataDTO.getGender() == ScoringDataDTO.Gender.ЖЕНЩИНА && age >= 35 && age < 60 ||
                 scoringDataDTO.getGender() == ScoringDataDTO.Gender.МУЖЧИНА  && age >= 30 && age < 55)
-            rate.subtract(BigDecimal.valueOf(3));
+            rate = rate.subtract(BigDecimal.valueOf(3));
         else if (scoringDataDTO.getGender() == ScoringDataDTO.Gender.НЕБИНАРНЫЙ)
-            rate.add(BigDecimal.valueOf(3));
+            rate = rate.add(BigDecimal.valueOf(3));
 
         return rate;
     }
 
     private BigDecimal getMonthlyPayment(Integer term, BigDecimal rate, BigDecimal amount){
-        BigDecimal P = rate.divide(BigDecimal.valueOf(1200), 10, RoundingMode.HALF_DOWN);//деление на 100 - получение процентов, на 12 - определение, какую часть от года состаляет
+        BigDecimal P = rate.divide(BigDecimal.valueOf(1200), 10, RoundingMode.HALF_UP);//деление на 100 - получение процентов, на 12 - определение, какую часть от года состаляет
         BigDecimal pow = BigDecimal.valueOf(1).add(P).pow(term);
         BigDecimal annuitetCoef = P.multiply(pow).divide(pow.subtract(BigDecimal.valueOf(1)), 10, RoundingMode.HALF_UP);
         BigDecimal monthlyPayment = annuitetCoef.multiply(amount);
@@ -139,12 +147,7 @@ public class CreditConveyorService {
             element.setTotalPayment(creditDTO.getMonthlyPayment());
             element.setDate(LocalDate.now().plusMonths(i));
 
-            Calendar calendar = new GregorianCalendar(element.getDate().getYear(),
-                    element.getDate().getMonth().getValue(),
-                    element.getDate().getDayOfMonth());
-
-            //TODO следует ли здесь использовать календарь или заменить на что-то лучшее?
-            int countOfDays = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
+            long countOfDays = between(element.getDate().minusMonths(1).atStartOfDay(), element.getDate().atStartOfDay()).toDays();
 
             element.setInterestPayment(remainder.multiply(creditDTO.getRate().divide(BigDecimal.valueOf(100), 10, RoundingMode.HALF_UP))
                     .multiply(BigDecimal.valueOf(countOfDays).divide(BigDecimal.valueOf(365), 10, RoundingMode.HALF_UP)).setScale(2, RoundingMode.HALF_UP));
@@ -160,7 +163,7 @@ public class CreditConveyorService {
     CreditDTO creditDTO = new CreditDTO();
     creditDTO.setRate(scoring(scoringDataDTO));
 
-    if (creditDTO.getRate() != null){
+    if (creditDTO.getRate() != null && creditDTO.getRate().compareTo(BigDecimal.valueOf(0)) > 0){
         creditDTO.setAmount(scoringDataDTO.getAmount());
         creditDTO.setTerm(scoringDataDTO.getTerm());
         creditDTO.setIsInsuranceEnabled(scoringDataDTO.getIsInsuranceEnabled());
@@ -169,9 +172,12 @@ public class CreditConveyorService {
         creditDTO.setMonthlyPayment(getMonthlyPayment(creditDTO.getTerm(), creditDTO.getRate(), creditDTO.getAmount()));
 
         BigDecimal psk = creditDTO.getMonthlyPayment().multiply(BigDecimal.valueOf(creditDTO.getTerm()));
-        if (creditDTO.getIsInsuranceEnabled()){
-            psk = psk.add(INSURANCE_COST);
-        }
+
+        psk = psk.divide(creditDTO.getAmount(), 10, RoundingMode.HALF_UP).
+                subtract(BigDecimal.valueOf(1)).
+                divide(BigDecimal.valueOf(creditDTO.getTerm()), 10, RoundingMode.HALF_UP).
+                multiply(BigDecimal.valueOf(100));
+
         creditDTO.setPsk(psk);
 
         creditDTO.setPaymentSchedule(getPaymentSchedule(creditDTO));

@@ -2,11 +2,7 @@ package com.konchalovmaxim.creditconveyorms.dto;
 
 import lombok.*;
 
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
 import java.math.BigDecimal;
-import java.util.Properties;
 
 @Getter
 @Setter

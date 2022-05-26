@@ -42,19 +42,19 @@ class CreditConveyorServiceTest {
         loanApplicationRequestDTO.setPassportNumber("123456");
 
         List<LoanOfferDTO> expected = new ArrayList<>(4);
-        expected.add(new LoanOfferDTO(null, BigDecimal.valueOf(10000),
+        expected.add(new LoanOfferDTO(0L, BigDecimal.valueOf(10000),
                 BigDecimal.valueOf(10591.38).setScale(2, RoundingMode.HALF_UP), 6, BigDecimal.valueOf(1765.23),
                 BigDecimal.valueOf(20), false, false));
 
-        expected.add(new LoanOfferDTO(null, BigDecimal.valueOf(10000),
+        expected.add(new LoanOfferDTO(1L, BigDecimal.valueOf(10000),
                 BigDecimal.valueOf(10531.50).setScale(2, RoundingMode.HALF_UP), 6, BigDecimal.valueOf(1755.25),
                 BigDecimal.valueOf(18), true, false));
 
-        expected.add(new LoanOfferDTO(null, BigDecimal.valueOf(10000),
+        expected.add(new LoanOfferDTO(2L, BigDecimal.valueOf(10000),
                 BigDecimal.valueOf(10501.62).setScale(2, RoundingMode.HALF_UP), 6, BigDecimal.valueOf(1750.27),
                 BigDecimal.valueOf(17), false, true));
 
-        expected.add(new LoanOfferDTO(null, BigDecimal.valueOf(10000),
+        expected.add(new LoanOfferDTO(3L, BigDecimal.valueOf(10000),
                 BigDecimal.valueOf(10442.04).setScale(2, RoundingMode.HALF_UP), 6, BigDecimal.valueOf(1740.34),
                 BigDecimal.valueOf(15), true, true));
 
