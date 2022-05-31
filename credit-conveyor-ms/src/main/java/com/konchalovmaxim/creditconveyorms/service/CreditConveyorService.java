@@ -1,6 +1,10 @@
 package com.konchalovmaxim.creditconveyorms.service;
 
 import com.konchalovmaxim.creditconveyorms.dto.*;
+import com.konchalovmaxim.creditconveyorms.enums.EmploymentPosition;
+import com.konchalovmaxim.creditconveyorms.enums.EmploymentStatus;
+import com.konchalovmaxim.creditconveyorms.enums.Gender;
+import com.konchalovmaxim.creditconveyorms.enums.MartialStatus;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.BindingResult;
@@ -52,7 +56,6 @@ public class CreditConveyorService {
         for (int i = 0; i < 4; i++){
 
             LoanOfferDTO loanOfferDTO = new LoanOfferDTO();
-            loanOfferDTO.setApplicationId((long) i);
             loanOfferDTO.setRequestedAmount(preScoredRequest.getAmount());
             loanOfferDTO.setTerm(preScoredRequest.getTerm());
             loanOfferDTO.setIsSalaryClient(false);
@@ -82,7 +85,7 @@ public class CreditConveyorService {
 
 
     private BigDecimal scoring(ScoringDataDTO scoringDataDTO){
-        if (scoringDataDTO.getEmployment().getEmploymentStatus() == EmploymentDTO.EmploymentStatus.БЕЗРАБОТНЫЙ)
+        if (scoringDataDTO.getEmployment().getEmploymentStatus() == EmploymentStatus.UNEMPLOYED)
             return null;
         if (scoringDataDTO.getEmployment().getSalary().multiply(BigDecimal.valueOf(20)).compareTo(scoringDataDTO.getAmount()) < 0)
             return null;
@@ -99,28 +102,28 @@ public class CreditConveyorService {
                 scoringDataDTO.getAmount(),
                 scoringDataDTO.getTerm());
 
-        if (scoringDataDTO.getEmployment().getEmploymentStatus() == EmploymentDTO.EmploymentStatus.САМОЗАНЯТЫЙ)
+        if (scoringDataDTO.getEmployment().getEmploymentStatus() == EmploymentStatus.EMPLOYED)
            rate = rate.add(BigDecimal.valueOf(1));
-        else if (scoringDataDTO.getEmployment().getEmploymentStatus() == EmploymentDTO.EmploymentStatus.ВЛАДЕЛЕЦ_БИЗНЕСА)
+        else if (scoringDataDTO.getEmployment().getEmploymentStatus() == EmploymentStatus.BUSINESS_OWNER)
             rate = rate.add(BigDecimal.valueOf(3));
 
-        if (scoringDataDTO.getEmployment().getPosition() == EmploymentDTO.Position.МЕНЕДЖЕР)
+        if (scoringDataDTO.getEmployment().getPosition() == EmploymentPosition.MID_MANAGER)
             rate = rate.subtract(BigDecimal.valueOf(2));
-        else if (scoringDataDTO.getEmployment().getPosition() == EmploymentDTO.Position.ТОП_МЕНЕДЖЕР)
+        else if (scoringDataDTO.getEmployment().getPosition() == EmploymentPosition.TOP_MANAGER)
             rate = rate.subtract(BigDecimal.valueOf(4));
 
-        if (scoringDataDTO.getMaritalStatus() == ScoringDataDTO.MartialStatus.В_ОТНОШЕНИЯХ)
+        if (scoringDataDTO.getMaritalStatus() == MartialStatus.MARRIED)
             rate = rate.subtract(BigDecimal.valueOf(3));
-        else if (scoringDataDTO.getMaritalStatus() == ScoringDataDTO.MartialStatus.РАЗВЕДЕН)
+        else if (scoringDataDTO.getMaritalStatus() == MartialStatus.DIVORCED)
             rate = rate.add(BigDecimal.valueOf(1));
 
         if (scoringDataDTO.getDependentAmount() > 1)
             rate = rate.add(BigDecimal.valueOf(1));
 
-        if (scoringDataDTO.getGender() == ScoringDataDTO.Gender.ЖЕНЩИНА && age >= 35 && age < 60 ||
-                scoringDataDTO.getGender() == ScoringDataDTO.Gender.МУЖЧИНА  && age >= 30 && age < 55)
+        if (scoringDataDTO.getGender() == Gender.FEMALE && age >= 35 && age < 60 ||
+                scoringDataDTO.getGender() == Gender.MALE  && age >= 30 && age < 55)
             rate = rate.subtract(BigDecimal.valueOf(3));
-        else if (scoringDataDTO.getGender() == ScoringDataDTO.Gender.НЕБИНАРНЫЙ)
+        else if (scoringDataDTO.getGender() == Gender.NON_BINARY)
             rate = rate.add(BigDecimal.valueOf(3));
 
         return rate;

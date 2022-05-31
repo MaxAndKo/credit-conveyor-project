@@ -1,5 +1,7 @@
 package com.konchalovmaxim.creditconveyorms.dto;
 
+import com.konchalovmaxim.creditconveyorms.enums.EmploymentPosition;
+import com.konchalovmaxim.creditconveyorms.enums.EmploymentStatus;
 import lombok.*;
 
 import javax.validation.constraints.NotEmpty;
@@ -20,21 +22,12 @@ public class EmploymentDTO {
     @NotNull
     private BigDecimal salary;
     @NotNull
-    private Position position;
+    private EmploymentPosition position;
     @NotNull
     private Integer workExperienceTotal;
     @NotNull
     private Integer workExperienceCurrent;
 
-    public enum EmploymentStatus{
-        БЕЗРАБОТНЫЙ,
-        САМОЗАНЯТЫЙ,
-        ВЛАДЕЛЕЦ_БИЗНЕСА
-    }
 
-    public enum Position{
-        МЕНЕДЖЕР,
-        ТОП_МЕНЕДЖЕР
-    }
 
 }

@@ -1,5 +1,7 @@
 package com.konchalovmaxim.creditconveyorms.dto;
 
+import com.konchalovmaxim.creditconveyorms.enums.Gender;
+import com.konchalovmaxim.creditconveyorms.enums.MartialStatus;
 import lombok.*;
 
 import javax.validation.Valid;
@@ -75,16 +77,5 @@ public class ScoringDataDTO {
     @NotNull
     private Boolean isSalaryClient;
 
-    public enum Gender{
-        МУЖЧИНА,
-        ЖЕНЩИНА,
-        НЕБИНАРНЫЙ
-    }
-
-    public enum MartialStatus{
-        НЕ_В_ОТНОШЕНИЯХ,
-        В_ОТНОШЕНИЯХ,
-        РАЗВЕДЕН
-    }
 
 }
