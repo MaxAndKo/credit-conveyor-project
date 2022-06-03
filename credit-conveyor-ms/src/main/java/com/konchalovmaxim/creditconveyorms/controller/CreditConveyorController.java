@@ -7,6 +7,7 @@ import com.konchalovmaxim.creditconveyorms.dto.ScoringDataDTO;
 import com.konchalovmaxim.creditconveyorms.service.CreditConveyorService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -15,29 +16,23 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/conveyor")
+@Validated
 public class CreditConveyorController {
 
-    @Autowired
-    private CreditConveyorService creditConveyorService;
+    private final CreditConveyorService creditConveyorService;
+
+    public CreditConveyorController(CreditConveyorService creditConveyorService) {
+        this.creditConveyorService = creditConveyorService;
+    }
 
     @PostMapping("/offers")
-    public List<LoanOfferDTO> offerСalculation(@Valid @RequestBody LoanApplicationRequestDTO applicationRequestDTO,
-                                               BindingResult bindingResult){
-        if (!bindingResult.hasErrors() && creditConveyorService.getAge(applicationRequestDTO.getBirthdate()) >= 18){
+    public List<LoanOfferDTO> offerСalculation(@Valid @RequestBody LoanApplicationRequestDTO applicationRequestDTO){
             return creditConveyorService.create4Offers(applicationRequestDTO);
-        }
-
-        return null;
     }
 
 
     @PostMapping("/calculation")
-    public CreditDTO creditCalculation(@Valid @RequestBody ScoringDataDTO dataDTO,
-                                       BindingResult bindingResult){
-        if (!bindingResult.hasErrors()){
+    public CreditDTO creditCalculation(@Valid @RequestBody ScoringDataDTO dataDTO){
             return creditConveyorService.createCredit(dataDTO);
-        }
-
-        return null;
     }
 }

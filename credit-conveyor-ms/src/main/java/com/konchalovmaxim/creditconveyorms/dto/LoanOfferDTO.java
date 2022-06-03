@@ -4,12 +4,9 @@ import lombok.*;
 
 import java.math.BigDecimal;
 
-@Getter
-@Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode
-@ToString
+@Data
 public class LoanOfferDTO {
 
     private Long applicationId;

@@ -1,22 +1,23 @@
 package com.konchalovmaxim.creditconveyorms.dto;
 
 import lombok.*;
+import org.springframework.validation.annotation.Validated;
 
 import javax.validation.constraints.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
-@Getter
-@Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString
+@Data
+@Validated
 public class LoanApplicationRequestDTO {
 
     @Min(10000)
     private BigDecimal amount;
 
     @Min(6)
+    @NotNull
     private Integer term;
 
     @NotEmpty
