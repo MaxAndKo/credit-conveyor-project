@@ -1,6 +1,5 @@
 package com.konchalovmaxim.creditconveyorms.bean;
 
-import lombok.Getter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -22,7 +21,7 @@ public class RateProperties {
     public final BigDecimal MIDDLE_AGE_RATE;
     public final BigDecimal NON_BINARY_RATE;
 
-    public RateProperties(@Value("${insurance_enabled}") BigDecimal INSURANCE_ENABLED,
+    public RateProperties(@Value("${insuranceEnabled}") BigDecimal INSURANCE_ENABLED,
                           @Value("${salaryClient}") BigDecimal SALARY_CLIENT,
                           @Value("${standardRate}") BigDecimal STANDARD_RATE,
                           @Value("${insuranceCost}") BigDecimal INSURANCE_COST,

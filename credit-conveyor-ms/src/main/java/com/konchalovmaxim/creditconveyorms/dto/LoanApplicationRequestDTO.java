@@ -10,7 +10,6 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
-@Validated
 public class LoanApplicationRequestDTO {
 
     @Min(10000)

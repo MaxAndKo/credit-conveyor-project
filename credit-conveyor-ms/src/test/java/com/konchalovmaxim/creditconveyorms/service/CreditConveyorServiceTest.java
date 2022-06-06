@@ -6,10 +6,8 @@ import com.konchalovmaxim.creditconveyorms.enums.EmploymentStatus;
 import com.konchalovmaxim.creditconveyorms.enums.Gender;
 import com.konchalovmaxim.creditconveyorms.enums.MartialStatus;
 import org.junit.jupiter.api.Test;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -65,7 +63,7 @@ class CreditConveyorServiceTest {
                 18, BigDecimal.valueOf(19285.05).setScale(2, RoundingMode.HALF_UP),
                 BigDecimal.valueOf(19), true, true));
 
-        List<LoanOfferDTO> actual = creditConveyorService.create4Offers(loanApplicationRequestDTO);
+        List<LoanOfferDTO> actual = creditConveyorService.createFourOffers(loanApplicationRequestDTO);
 
         assertEquals(expected, actual);
     }

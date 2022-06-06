@@ -6,19 +6,13 @@ import com.konchalovmaxim.creditconveyorms.enums.EmploymentPosition;
 import com.konchalovmaxim.creditconveyorms.enums.EmploymentStatus;
 import com.konchalovmaxim.creditconveyorms.enums.Gender;
 import com.konchalovmaxim.creditconveyorms.enums.MartialStatus;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.validation.BindingResult;
-import org.springframework.validation.annotation.Validated;
 
-import javax.validation.Valid;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.Period;
 import java.util.*;
-import java.util.function.Predicate;
 
 import static java.time.Duration.between;
 
@@ -49,38 +43,30 @@ public class CreditConveyorService {
         return rate;
     }
 
-    public List<LoanOfferDTO> create4Offers(LoanApplicationRequestDTO preScoredRequest){
+    private LoanOfferDTO calculateOffer(LoanApplicationRequestDTO preScoredRequest, Boolean isInsuranceEnabled,
+                                        Boolean isSalaryClient){
+        BigDecimal rate = calculateBaseRate(isSalaryClient, isInsuranceEnabled);
+
+        BigDecimal monthlyPayment = getMonthlyPayment(preScoredRequest.getTerm(), rate, preScoredRequest.getAmount());
+
+        BigDecimal totalAmount = monthlyPayment.multiply(BigDecimal.valueOf(preScoredRequest.getTerm()));
+
+        return new LoanOfferDTO(0L, preScoredRequest.getAmount(), totalAmount,
+                preScoredRequest.getTerm(), monthlyPayment, rate, isInsuranceEnabled, isSalaryClient);
+    }
+
+    public List<LoanOfferDTO> createFourOffers(LoanApplicationRequestDTO preScoredRequest){
         List<LoanOfferDTO> loanOfferDTOS = new ArrayList<>(4);
 
-        for (int i = 0; i < 4; i++){
-
-            Boolean isInsuranceEnabled = false;
-            Boolean isSalaryClient = false;
-
-            if (i == 1 || i == 3){
-                isInsuranceEnabled = true;
-            }
-
-            if (i == 2 || i == 3){
-                isSalaryClient = true;
-            }
-
-            BigDecimal rate = calculateBaseRate(isSalaryClient, isInsuranceEnabled);
-
-            BigDecimal monthlyPayment = getMonthlyPayment(preScoredRequest.getTerm(), rate, preScoredRequest.getAmount());
-
-            BigDecimal totalAmount = monthlyPayment.multiply(BigDecimal.valueOf(preScoredRequest.getTerm()));
-
-            loanOfferDTOS.add(new LoanOfferDTO(0L, preScoredRequest.getAmount(), totalAmount,
-                    preScoredRequest.getTerm(), monthlyPayment, rate, isInsuranceEnabled, isSalaryClient));
-        }
-
-        Collections.sort(loanOfferDTOS, Comparator.comparing(LoanOfferDTO::getRate).reversed());
+        loanOfferDTOS.add(calculateOffer(preScoredRequest, false, false));
+        loanOfferDTOS.add(calculateOffer(preScoredRequest, true, false));
+        loanOfferDTOS.add(calculateOffer(preScoredRequest, false, true));
+        loanOfferDTOS.add(calculateOffer(preScoredRequest, true, true));
 
         return loanOfferDTOS;
     }
 
-    private Boolean checkRestrictions(ScoringDataDTO scoringDataDTO){
+    private Boolean isCreditAvailable(ScoringDataDTO scoringDataDTO){
         if (scoringDataDTO.getEmployment().getEmploymentStatus() == EmploymentStatus.UNEMPLOYED)
             return false;
         if (scoringDataDTO.getEmployment().getSalary().multiply(BigDecimal.valueOf(20)).
@@ -99,7 +85,7 @@ public class CreditConveyorService {
 
     private Optional<BigDecimal> scoring(ScoringDataDTO scoringDataDTO){
 
-        if (checkRestrictions(scoringDataDTO)){
+        if (isCreditAvailable(scoringDataDTO)){
 
             BigDecimal rate = calculateBaseRate(scoringDataDTO.getIsSalaryClient(),
                     scoringDataDTO.getIsInsuranceEnabled());

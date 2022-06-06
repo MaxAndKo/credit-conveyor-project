@@ -5,8 +5,6 @@ import com.konchalovmaxim.creditconveyorms.dto.LoanApplicationRequestDTO;
 import com.konchalovmaxim.creditconveyorms.dto.LoanOfferDTO;
 import com.konchalovmaxim.creditconveyorms.dto.ScoringDataDTO;
 import com.konchalovmaxim.creditconveyorms.service.CreditConveyorService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,8 +24,8 @@ public class CreditConveyorController {
     }
 
     @PostMapping("/offers")
-    public List<LoanOfferDTO> offerСalculation(@Valid @RequestBody LoanApplicationRequestDTO applicationRequestDTO){
-            return creditConveyorService.create4Offers(applicationRequestDTO);
+    public List<LoanOfferDTO> offerCalculation(@Valid @RequestBody LoanApplicationRequestDTO applicationRequestDTO){
+            return creditConveyorService.createFourOffers(applicationRequestDTO);
     }
 
 
