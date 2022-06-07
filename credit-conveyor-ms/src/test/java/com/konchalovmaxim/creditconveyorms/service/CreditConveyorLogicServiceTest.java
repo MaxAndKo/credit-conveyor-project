@@ -18,15 +18,19 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
-class CreditConveyorServiceTest {
+class CreditConveyorLogicServiceTest {
 
     @Autowired
-    CreditConveyorService creditConveyorService;
+    ScoringService scoringService;
+    @Autowired
+    OfferService offerService;
+    @Autowired
+    CreditService creditService;
 
     @Test
     void getAgeShouldReturnsTwenty() {
         LocalDate birthday = LocalDate.now().minusYears(20);
-        assertEquals(20, creditConveyorService.getAge(birthday));
+        assertEquals(20, scoringService.getAge(birthday));
     }
 
     @Test
@@ -63,7 +67,7 @@ class CreditConveyorServiceTest {
                 18, BigDecimal.valueOf(19285.05).setScale(2, RoundingMode.HALF_UP),
                 BigDecimal.valueOf(19), true, true));
 
-        List<LoanOfferDTO> actual = creditConveyorService.createFourOffers(loanApplicationRequestDTO);
+        List<LoanOfferDTO> actual = offerService.createFourOffers(loanApplicationRequestDTO);
 
         assertEquals(expected, actual);
     }
@@ -81,7 +85,7 @@ class CreditConveyorServiceTest {
                 MartialStatus.MARRIED, 1, employmentDTO, "account",
                 true, true);
 
-        CreditDTO creditDTO = creditConveyorService.createCredit(scoringDataDTO);
+        CreditDTO creditDTO = creditService.createCredit(scoringDataDTO);
 
         assertEquals(BigDecimal.valueOf(16), creditDTO.getRate());
         assertEquals(BigDecimal.valueOf(18856.93), creditDTO.getMonthlyPayment());
