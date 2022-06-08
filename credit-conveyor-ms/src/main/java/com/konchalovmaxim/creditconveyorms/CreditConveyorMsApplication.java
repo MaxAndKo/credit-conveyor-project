@@ -1,11 +1,12 @@
 package com.konchalovmaxim.creditconveyorms;
 
+import com.konchalovmaxim.creditconveyorms.config.RatePropertiesConfiguration;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 
 @SpringBootApplication
-@ConfigurationPropertiesScan("com.konchalovmaxim.creditconveyorms.bean")
+@EnableConfigurationProperties(RatePropertiesConfiguration.class)
 public class CreditConveyorMsApplication {
 
     public static void main(String[] args) {

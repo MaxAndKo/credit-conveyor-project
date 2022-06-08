@@ -1,4 +1,4 @@
-package com.konchalovmaxim.creditconveyorms.bean;
+package com.konchalovmaxim.creditconveyorms.config;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -9,7 +9,7 @@ import java.math.BigDecimal;
 @ConfigurationProperties(prefix = "rate")
 @PropertySource("classpath:application.properties")
 @Data
-public class RateProperties {
+public class RatePropertiesConfiguration {
     private BigDecimal insuranceCost;
     private BigDecimal standardRate;
     private BigDecimal insuranceEnabled;

@@ -1,6 +1,6 @@
 package com.konchalovmaxim.creditconveyorms.service;
 
-import com.konchalovmaxim.creditconveyorms.bean.RateProperties;
+import com.konchalovmaxim.creditconveyorms.config.RatePropertiesConfiguration;
 import com.konchalovmaxim.creditconveyorms.dto.*;
 import com.konchalovmaxim.creditconveyorms.enums.EmploymentPosition;
 import com.konchalovmaxim.creditconveyorms.enums.EmploymentStatus;
@@ -16,12 +16,12 @@ import java.util.*;
 @Service
 public class ScoringService {
 
-    private final RateProperties rateProperties;
+    private final RatePropertiesConfiguration ratePropertiesConfiguration;
 
     private final OfferService offerservice;
 
-    public ScoringService(RateProperties rateProperties, OfferService Offerservice) {
-        this.rateProperties = rateProperties;
+    public ScoringService(RatePropertiesConfiguration ratePropertiesConfiguration, OfferService Offerservice) {
+        this.ratePropertiesConfiguration = ratePropertiesConfiguration;
         this.offerservice = Offerservice;
     }
 
@@ -29,6 +29,45 @@ public class ScoringService {
         LocalDate currentTime = LocalDate.now();
         Period period = Period.between(birthdate, currentTime);
         return period.getYears();
+    }
+
+    public Optional<BigDecimal> scoring(ScoringDataDTO scoringDataDTO){
+
+        if (isCreditAvailable(scoringDataDTO)){
+
+            BigDecimal rate = offerservice.calculateBaseRate(scoringDataDTO.getIsSalaryClient(),
+                    scoringDataDTO.getIsInsuranceEnabled());
+
+            if (scoringDataDTO.getEmployment().getEmploymentStatus() == EmploymentStatus.EMPLOYED)
+                rate = rate.add(ratePropertiesConfiguration.getEmployed());
+            else if (scoringDataDTO.getEmployment().getEmploymentStatus() == EmploymentStatus.BUSINESS_OWNER)
+                rate = rate.add(ratePropertiesConfiguration.getBusinessOwner());
+
+            if (scoringDataDTO.getEmployment().getPosition() == EmploymentPosition.MID_MANAGER)
+                rate = rate.add(ratePropertiesConfiguration.getMidManager());
+            else if (scoringDataDTO.getEmployment().getPosition() == EmploymentPosition.TOP_MANAGER)
+                rate = rate.add(ratePropertiesConfiguration.getTopManager());
+
+            if (scoringDataDTO.getMaritalStatus() == MartialStatus.MARRIED)
+                rate = rate.add(ratePropertiesConfiguration.getMarried());
+            else if (scoringDataDTO.getMaritalStatus() == MartialStatus.DIVORCED)
+                rate = rate.add(ratePropertiesConfiguration.getDivorced());
+
+            if (scoringDataDTO.getDependentAmount() > 1)
+                rate = rate.add(ratePropertiesConfiguration.getDependentAmount());
+
+            int age = getAge(scoringDataDTO.getBirthdate());
+
+            if (scoringDataDTO.getGender() == Gender.FEMALE && age >= 35 && age < 60 ||
+                    scoringDataDTO.getGender() == Gender.MALE  && age >= 30 && age < 55)
+                rate = rate.add(ratePropertiesConfiguration.getMiddleAge());
+            else if (scoringDataDTO.getGender() == Gender.NON_BINARY)
+                rate = rate.add(ratePropertiesConfiguration.getNonBinary());
+
+            return Optional.of(rate);
+        }
+
+        return Optional.empty();
     }
 
     private Boolean isCreditAvailable(ScoringDataDTO scoringDataDTO){
@@ -48,42 +87,4 @@ public class ScoringService {
         return true;
     }
 
-    public Optional<BigDecimal> scoring(ScoringDataDTO scoringDataDTO){
-
-        if (isCreditAvailable(scoringDataDTO)){
-
-            BigDecimal rate = offerservice.calculateBaseRate(scoringDataDTO.getIsSalaryClient(),
-                    scoringDataDTO.getIsInsuranceEnabled());
-
-            if (scoringDataDTO.getEmployment().getEmploymentStatus() == EmploymentStatus.EMPLOYED)
-                rate = rate.add(rateProperties.getEmployed());
-            else if (scoringDataDTO.getEmployment().getEmploymentStatus() == EmploymentStatus.BUSINESS_OWNER)
-                rate = rate.add(rateProperties.getBusinessOwner());
-
-            if (scoringDataDTO.getEmployment().getPosition() == EmploymentPosition.MID_MANAGER)
-                rate = rate.add(rateProperties.getMidManager());
-            else if (scoringDataDTO.getEmployment().getPosition() == EmploymentPosition.TOP_MANAGER)
-                rate = rate.add(rateProperties.getTopManager());
-
-            if (scoringDataDTO.getMaritalStatus() == MartialStatus.MARRIED)
-                rate = rate.add(rateProperties.getMarried());
-            else if (scoringDataDTO.getMaritalStatus() == MartialStatus.DIVORCED)
-                rate = rate.add(rateProperties.getDivorced());
-
-            if (scoringDataDTO.getDependentAmount() > 1)
-                rate = rate.add(rateProperties.getDependentAmount());
-
-            int age = getAge(scoringDataDTO.getBirthdate());
-
-            if (scoringDataDTO.getGender() == Gender.FEMALE && age >= 35 && age < 60 ||
-                    scoringDataDTO.getGender() == Gender.MALE  && age >= 30 && age < 55)
-                rate = rate.add(rateProperties.getMiddleAge());
-            else if (scoringDataDTO.getGender() == Gender.NON_BINARY)
-                rate = rate.add(rateProperties.getNonBinary());
-
-            return Optional.of(rate);
-        }
-
-        return Optional.empty();
-    }
 }

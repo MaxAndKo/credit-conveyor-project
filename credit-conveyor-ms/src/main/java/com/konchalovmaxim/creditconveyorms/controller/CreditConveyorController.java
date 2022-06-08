@@ -6,8 +6,6 @@ import com.konchalovmaxim.creditconveyorms.dto.LoanOfferDTO;
 import com.konchalovmaxim.creditconveyorms.dto.ScoringDataDTO;
 import com.konchalovmaxim.creditconveyorms.service.CreditService;
 import com.konchalovmaxim.creditconveyorms.service.OfferService;
-import com.konchalovmaxim.creditconveyorms.service.ScoringService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 

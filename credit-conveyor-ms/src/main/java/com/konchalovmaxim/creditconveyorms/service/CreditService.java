@@ -24,11 +24,11 @@ public class CreditService {
     @Autowired
     private OfferService offerService;
 
-    public CreditDTO createCredit(ScoringDataDTO scoringDataDTO){
+    public CreditDTO createCredit(ScoringDataDTO scoringDataDTO) {
 
         Optional<BigDecimal> rate = scoringService.scoring(scoringDataDTO);
 
-        if (rate.isPresent() && rate.get().compareTo(BigDecimal.ZERO) > 0){
+        if (rate.isPresent() && rate.get().compareTo(BigDecimal.ZERO) > 0) {
 
             CreditDTO creditDTO = new CreditDTO();
 
@@ -56,12 +56,12 @@ public class CreditService {
         return null;
     }
 
-    private List<PaymentScheduleElement> getPaymentSchedule(CreditDTO creditDTO){
+    private List<PaymentScheduleElement> getPaymentSchedule(CreditDTO creditDTO) {
 
         List<PaymentScheduleElement> paymentSchedule = new ArrayList<>();
 
         BigDecimal remainder = creditDTO.getAmount();
-        for (int i = 1; i <= creditDTO.getTerm(); i++){
+        for (int i = 1; i <= creditDTO.getTerm(); i++) {
 
             LocalDate paymentDate = LocalDate.now().plusMonths(i);
 
@@ -74,7 +74,7 @@ public class CreditService {
 
             BigDecimal debtPayment = creditDTO.getMonthlyPayment().subtract(interestPayment).setScale(2, RoundingMode.HALF_UP);
 
-            paymentSchedule.add(new PaymentScheduleElement(i,paymentDate, creditDTO.getMonthlyPayment(), interestPayment, debtPayment, remainder));
+            paymentSchedule.add(new PaymentScheduleElement(i, paymentDate, creditDTO.getMonthlyPayment(), interestPayment, debtPayment, remainder));
 
             remainder = remainder.subtract(debtPayment);
         }
