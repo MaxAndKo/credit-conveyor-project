@@ -6,6 +6,7 @@ import com.konchalovmaxim.creditconveyorms.dto.LoanOfferDTO;
 import com.konchalovmaxim.creditconveyorms.dto.ScoringDataDTO;
 import com.konchalovmaxim.creditconveyorms.service.CreditService;
 import com.konchalovmaxim.creditconveyorms.service.OfferService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,15 +17,11 @@ import java.util.List;
 @RestController
 @RequestMapping("/conveyor")
 @Validated
+@RequiredArgsConstructor
 public class CreditConveyorController {
 
     private final OfferService offerService;
     private final CreditService creditService;
-
-    public CreditConveyorController(OfferService offerService, CreditService creditService) {
-        this.offerService = offerService;
-        this.creditService = creditService;
-    }
 
     @PostMapping("/offers")
     public List<LoanOfferDTO> offerCalculation(@Valid @RequestBody LoanApplicationRequestDTO applicationRequestDTO){

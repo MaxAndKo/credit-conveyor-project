@@ -7,7 +7,6 @@ import org.springframework.context.annotation.PropertySource;
 import java.math.BigDecimal;
 
 @ConfigurationProperties(prefix = "rate")
-@PropertySource("classpath:application.properties")
 @Data
 public class RatePropertiesConfiguration {
     private BigDecimal insuranceCost;

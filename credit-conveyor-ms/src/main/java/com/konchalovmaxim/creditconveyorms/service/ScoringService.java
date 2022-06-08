@@ -6,24 +6,21 @@ import com.konchalovmaxim.creditconveyorms.enums.EmploymentPosition;
 import com.konchalovmaxim.creditconveyorms.enums.EmploymentStatus;
 import com.konchalovmaxim.creditconveyorms.enums.Gender;
 import com.konchalovmaxim.creditconveyorms.enums.MartialStatus;
+import com.konchalovmaxim.creditconveyorms.exception.CreditNotAvailableException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.Period;
 import java.util.*;
 
 @Service
+@RequiredArgsConstructor
 public class ScoringService {
 
     private final RatePropertiesConfiguration ratePropertiesConfiguration;
-
-    private final OfferService offerservice;
-
-    public ScoringService(RatePropertiesConfiguration ratePropertiesConfiguration, OfferService Offerservice) {
-        this.ratePropertiesConfiguration = ratePropertiesConfiguration;
-        this.offerservice = Offerservice;
-    }
 
     public int getAge(LocalDate birthdate){
         LocalDate currentTime = LocalDate.now();
@@ -31,11 +28,20 @@ public class ScoringService {
         return period.getYears();
     }
 
-    public Optional<BigDecimal> scoring(ScoringDataDTO scoringDataDTO){
+    public BigDecimal getMonthlyPayment(Integer term, BigDecimal rate, BigDecimal amount) {
+        BigDecimal monthlyInterestRate = rate.divide(BigDecimal.valueOf(1200), 10, RoundingMode.HALF_UP);//деление на 100 - получение процентов, на 12 - определение, какую часть от года состаляет
+        BigDecimal poweredRate = BigDecimal.ONE.add(monthlyInterestRate).pow(term);
+        BigDecimal annuitetCoef = monthlyInterestRate.multiply(poweredRate).
+                divide(poweredRate.subtract(BigDecimal.valueOf(1)), 10, RoundingMode.HALF_UP);
+        BigDecimal monthlyPayment = annuitetCoef.multiply(amount);
+        return monthlyPayment.setScale(2, RoundingMode.HALF_UP);
+    }
+
+    public Optional<BigDecimal> scoring(ScoringDataDTO scoringDataDTO) throws CreditNotAvailableException {
 
         if (isCreditAvailable(scoringDataDTO)){
 
-            BigDecimal rate = offerservice.calculateBaseRate(scoringDataDTO.getIsSalaryClient(),
+            BigDecimal rate = calculateBaseRate(scoringDataDTO.getIsSalaryClient(),
                     scoringDataDTO.getIsInsuranceEnabled());
 
             if (scoringDataDTO.getEmployment().getEmploymentStatus() == EmploymentStatus.EMPLOYED)
@@ -67,7 +73,19 @@ public class ScoringService {
             return Optional.of(rate);
         }
 
-        return Optional.empty();
+        throw new CreditNotAvailableException("Заявка не одобрена");
+    }
+
+    public BigDecimal calculateBaseRate(Boolean isSalaryClient, Boolean isInsuranceEnabled) {
+        BigDecimal rate = ratePropertiesConfiguration.getStandardRate();
+        if (isInsuranceEnabled) {
+            rate = rate.add(ratePropertiesConfiguration.getInsuranceEnabled());
+        }
+
+        if (isSalaryClient) {
+            rate = rate.add(ratePropertiesConfiguration.getSalaryClient());
+        }
+        return rate;
     }
 
     private Boolean isCreditAvailable(ScoringDataDTO scoringDataDTO){

@@ -3,6 +3,7 @@ package com.konchalovmaxim.creditconveyorms.service;
 import com.konchalovmaxim.creditconveyorms.dto.CreditDTO;
 import com.konchalovmaxim.creditconveyorms.dto.PaymentScheduleElement;
 import com.konchalovmaxim.creditconveyorms.dto.ScoringDataDTO;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -16,13 +17,12 @@ import java.util.Optional;
 import static java.time.Duration.between;
 
 @Service
+@RequiredArgsConstructor
 public class CreditService {
 
-    @Autowired
-    private ScoringService scoringService;
+    private final ScoringService scoringService;
 
-    @Autowired
-    private OfferService offerService;
+    private final OfferService offerService;
 
     public CreditDTO createCredit(ScoringDataDTO scoringDataDTO) {
 
@@ -38,7 +38,7 @@ public class CreditService {
             creditDTO.setIsInsuranceEnabled(scoringDataDTO.getIsInsuranceEnabled());
             creditDTO.setIsSalaryClient(scoringDataDTO.getIsSalaryClient());
 
-            creditDTO.setMonthlyPayment(offerService.getMonthlyPayment(creditDTO.getTerm(), creditDTO.getRate(), creditDTO.getAmount()));
+            creditDTO.setMonthlyPayment(scoringService.getMonthlyPayment(creditDTO.getTerm(), creditDTO.getRate(), creditDTO.getAmount()));
 
             BigDecimal psk = creditDTO.getMonthlyPayment().multiply(BigDecimal.valueOf(creditDTO.getTerm()));
 

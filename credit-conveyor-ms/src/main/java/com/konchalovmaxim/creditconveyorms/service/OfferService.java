@@ -3,6 +3,8 @@ package com.konchalovmaxim.creditconveyorms.service;
 import com.konchalovmaxim.creditconveyorms.config.RatePropertiesConfiguration;
 import com.konchalovmaxim.creditconveyorms.dto.LoanApplicationRequestDTO;
 import com.konchalovmaxim.creditconveyorms.dto.LoanOfferDTO;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -11,49 +13,26 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class OfferService {
 
     private final RatePropertiesConfiguration ratePropertiesConfiguration;
 
-    public OfferService(RatePropertiesConfiguration ratePropertiesConfiguration) {
-        this.ratePropertiesConfiguration = ratePropertiesConfiguration;
-    }
-
-    public BigDecimal calculateBaseRate(Boolean isSalaryClient, Boolean isInsuranceEnabled) {
-        BigDecimal rate = ratePropertiesConfiguration.getStandardRate();
-        if (isInsuranceEnabled) {
-            rate = rate.add(ratePropertiesConfiguration.getInsuranceEnabled());
-        }
-
-        if (isSalaryClient) {
-            rate = rate.add(ratePropertiesConfiguration.getSalaryClient());
-        }
-        return rate;
-    }
-
-    public BigDecimal getMonthlyPayment(Integer term, BigDecimal rate, BigDecimal amount) {
-        BigDecimal P = rate.divide(BigDecimal.valueOf(1200), 10, RoundingMode.HALF_UP);//деление на 100 - получение процентов, на 12 - определение, какую часть от года состаляет
-        BigDecimal pow = BigDecimal.valueOf(1).add(P).pow(term);
-        BigDecimal annuitetCoef = P.multiply(pow).divide(pow.subtract(BigDecimal.valueOf(1)), 10, RoundingMode.HALF_UP);
-        BigDecimal monthlyPayment = annuitetCoef.multiply(amount);
-        return monthlyPayment.setScale(2, RoundingMode.HALF_UP);
-    }
+    private final ScoringService scoringService;
 
     public List<LoanOfferDTO> createFourOffers(LoanApplicationRequestDTO preScoredRequest) {
-        List<LoanOfferDTO> loanOfferDTOS = new ArrayList<>(4);
-
-        loanOfferDTOS.add(calculateOffer(preScoredRequest, false, false));
-        loanOfferDTOS.add(calculateOffer(preScoredRequest, true, false));
-        loanOfferDTOS.add(calculateOffer(preScoredRequest, false, true));
-        loanOfferDTOS.add(calculateOffer(preScoredRequest, true, true));
-
-        return loanOfferDTOS;
+        return (List<LoanOfferDTO>) List.of(
+                calculateOffer(preScoredRequest, false, false),
+                calculateOffer(preScoredRequest, true, false),
+                calculateOffer(preScoredRequest, false, true),
+                calculateOffer(preScoredRequest, true, true)
+        );
     }
 
     private LoanOfferDTO calculateOffer(LoanApplicationRequestDTO preScoredRequest, Boolean isInsuranceEnabled, Boolean isSalaryClient) {
-        BigDecimal rate = calculateBaseRate(isSalaryClient, isInsuranceEnabled);
+        BigDecimal rate = scoringService.calculateBaseRate(isSalaryClient, isInsuranceEnabled);
 
-        BigDecimal monthlyPayment = getMonthlyPayment(preScoredRequest.getTerm(), rate, preScoredRequest.getAmount());
+        BigDecimal monthlyPayment = scoringService.getMonthlyPayment(preScoredRequest.getTerm(), rate, preScoredRequest.getAmount());
 
         BigDecimal totalAmount = monthlyPayment.multiply(BigDecimal.valueOf(preScoredRequest.getTerm()));
 
