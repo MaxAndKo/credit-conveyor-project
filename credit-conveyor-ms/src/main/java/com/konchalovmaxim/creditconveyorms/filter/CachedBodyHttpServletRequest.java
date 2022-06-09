@@ -1,4 +1,4 @@
-package com.konchalovmaxim.creditconveyorms.httpLogging;
+package com.konchalovmaxim.creditconveyorms.filter;
 
 
 import org.springframework.util.StreamUtils;

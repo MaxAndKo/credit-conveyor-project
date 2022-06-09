@@ -1,7 +1,8 @@
-package com.konchalovmaxim.creditconveyorms.httpLogging;
+package com.konchalovmaxim.creditconveyorms.filter;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 import javax.servlet.*;
@@ -11,6 +12,7 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
+@Profile("http_logs")
 @Component
 public class RequestResponseLoggingFilter implements Filter {
     private static final Logger LOG = LoggerFactory.getLogger(RequestResponseLoggingFilter.class);
@@ -19,8 +21,15 @@ public class RequestResponseLoggingFilter implements Filter {
     public void doFilter(ServletRequest request, ServletResponse response,
                          FilterChain filterChain) throws IOException, ServletException {
 
+
         CachedBodyHttpServletRequest cachedBodyHttpServletRequest =
                 new CachedBodyHttpServletRequest((HttpServletRequest) request);
+
+        if (cachedBodyHttpServletRequest.getRequestURI().contains("api-docs") ||
+                cachedBodyHttpServletRequest.getRequestURI().contains("swagger")){
+            filterChain.doFilter(request, response);
+            return;
+        }
 
         LOG.info("Request info:");
         LOG.info("Request Method: {}", cachedBodyHttpServletRequest.getMethod());

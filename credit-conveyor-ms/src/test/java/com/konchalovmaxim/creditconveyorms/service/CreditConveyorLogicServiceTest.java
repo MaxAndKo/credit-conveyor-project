@@ -67,7 +67,7 @@ class CreditConveyorLogicServiceTest {
                 18, BigDecimal.valueOf(19285.05).setScale(2, RoundingMode.HALF_UP),
                 BigDecimal.valueOf(19), true, true));
 
-        List<LoanOfferDTO> actual = offerService.createFourOffers(loanApplicationRequestDTO);
+        List<LoanOfferDTO> actual = offerService.createOffers(loanApplicationRequestDTO);
 
         assertEquals(expected, actual);
     }

@@ -25,7 +25,7 @@ public class CreditConveyorController {
 
     @PostMapping("/offers")
     public List<LoanOfferDTO> offerCalculation(@Valid @RequestBody LoanApplicationRequestDTO applicationRequestDTO){
-            return offerService.createFourOffers(applicationRequestDTO);
+            return offerService.createOffers(applicationRequestDTO);
     }
 
 

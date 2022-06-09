@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
 
-@Profile("logs")
+@Profile("aspect_logs")
 @Component
 @Aspect
 public class LoggingAspect {

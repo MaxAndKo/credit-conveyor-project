@@ -1,4 +1,4 @@
-package com.konchalovmaxim.creditconveyorms.httpLogging;
+package com.konchalovmaxim.creditconveyorms.filter;
 
 
 import javax.servlet.ReadListener;
