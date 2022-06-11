@@ -1,6 +1,7 @@
 package com.konchalovmaxim.creditconveyorms.aspect;
 
 
+import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -15,8 +16,8 @@ import java.util.Arrays;
 @Profile("aspect_logs")
 @Component
 @Aspect
+@Slf4j
 public class LoggingAspect {
-    private static final Logger LOGGER = LoggerFactory.getLogger(LoggingAspect.class);
 
     @Around("execution(* com.konchalovmaxim.creditconveyorms.*.*.*(..))")
     public Object aroundAllPublicMethodsAdvice(
@@ -29,7 +30,7 @@ public class LoggingAspect {
         logMessage.append(" with args: ");
         logMessage.append(Arrays.toString(proceedingJoinPoint.getArgs()));
         //до исполнения метода
-        LOGGER.info(logMessage.toString());
+        log.info(logMessage.toString());
 
         Object targetMethodResult = proceedingJoinPoint.proceed();
 
@@ -39,7 +40,7 @@ public class LoggingAspect {
         logMessage.append(" with result: ");
         logMessage.append(targetMethodResult);
         //после исполнения метода
-        LOGGER.info(logMessage.toString());
+        log.info(logMessage.toString());
 
         return targetMethodResult;
     }

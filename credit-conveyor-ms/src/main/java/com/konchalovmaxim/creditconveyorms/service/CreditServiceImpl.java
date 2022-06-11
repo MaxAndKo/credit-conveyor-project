@@ -4,6 +4,10 @@ import com.konchalovmaxim.creditconveyorms.dto.CreditDTO;
 import com.konchalovmaxim.creditconveyorms.dto.PaymentScheduleElement;
 import com.konchalovmaxim.creditconveyorms.dto.ScoringDataDTO;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j;
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -16,9 +20,13 @@ import static java.time.Duration.between;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class CreditServiceImpl implements CreditService{
 
     private final ScoringService scoringService;
+
+    private final BigDecimal DAYS_A_YEAR = BigDecimal.valueOf(365);
+    private final BigDecimal HUNDRED_PERCENT = BigDecimal.valueOf(100);
 
     public CreditDTO createCredit(ScoringDataDTO scoringDataDTO) {
 
@@ -47,12 +55,16 @@ public class CreditServiceImpl implements CreditService{
     }
 
     private BigDecimal calculatePsk(BigDecimal monthlyPayment, Integer term, BigDecimal amount){
+
+        log.debug("Calculating PSK with params: monthlyPayment {}, term {}, amount {}",
+                monthlyPayment, term, amount);
+
         BigDecimal psk = monthlyPayment.multiply(BigDecimal.valueOf(term));
 
         psk = psk.divide(amount, 10, RoundingMode.HALF_UP).
                 subtract(BigDecimal.valueOf(1)).
                 divide(BigDecimal.valueOf(term), 10, RoundingMode.HALF_UP).
-                multiply(BigDecimal.valueOf(100));
+                multiply(HUNDRED_PERCENT);
 
         return psk;
     }
@@ -86,9 +98,15 @@ public class CreditServiceImpl implements CreditService{
     private BigDecimal calculateInterestPayment(BigDecimal remainder, LocalDate paymentDate, BigDecimal rate){
         long countOfDays = between(paymentDate.minusMonths(1).atStartOfDay(), paymentDate.atStartOfDay()).toDays();
 
-        return remainder.
-                multiply(rate.divide(BigDecimal.valueOf(100), 10, RoundingMode.HALF_UP)).
-                multiply(BigDecimal.valueOf(countOfDays).divide(BigDecimal.valueOf(365), 10, RoundingMode.HALF_UP)).
+        log.debug("Payment period: {}", countOfDays);
+
+        BigDecimal interestPayment = remainder.
+                multiply(rate.divide(HUNDRED_PERCENT, 10, RoundingMode.HALF_UP)).
+                multiply(BigDecimal.valueOf(countOfDays).divide(DAYS_A_YEAR, 10, RoundingMode.HALF_UP)).
                 setScale(2, RoundingMode.HALF_UP);
+
+        log.debug("Calculate interest payment: {}", interestPayment);
+
+        return interestPayment;
     }
 }

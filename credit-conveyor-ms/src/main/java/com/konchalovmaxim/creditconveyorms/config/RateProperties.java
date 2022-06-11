@@ -2,13 +2,12 @@ package com.konchalovmaxim.creditconveyorms.config;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.PropertySource;
 
 import java.math.BigDecimal;
 
 @ConfigurationProperties(prefix = "rate")
 @Data
-public class RatePropertiesConfiguration {
+public class RateProperties {
     private BigDecimal insuranceCost;
     private BigDecimal standardRate;
     private BigDecimal insuranceEnabled;

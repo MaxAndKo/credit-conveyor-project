@@ -1,8 +1,8 @@
 package com.konchalovmaxim.creditconveyorms.filter;
 
+import com.konchalovmaxim.creditconveyorms.config.HttpProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 import javax.servlet.*;
@@ -12,28 +12,39 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
-@Profile("http_logs")
 @Component
 public class RequestResponseLoggingFilter implements Filter {
     private static final Logger LOG = LoggerFactory.getLogger(RequestResponseLoggingFilter.class);
+
+    private final HttpProperties notLogHttp;
+
+    public RequestResponseLoggingFilter(HttpProperties notLogHttp) {
+        this.notLogHttp = notLogHttp;
+    }
+
+    public Boolean shouldLog(String URI){
+        if (URI.contains(notLogHttp.getApiDocs()) ||
+                URI.contains(notLogHttp.getSwagger())){
+            return false;
+        }
+        return true;
+    }
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response,
                          FilterChain filterChain) throws IOException, ServletException {
 
-
         CachedBodyHttpServletRequest cachedBodyHttpServletRequest =
                 new CachedBodyHttpServletRequest((HttpServletRequest) request);
 
-        if (cachedBodyHttpServletRequest.getRequestURI().contains("api-docs") ||
-                cachedBodyHttpServletRequest.getRequestURI().contains("swagger")){
+        if (!shouldLog(cachedBodyHttpServletRequest.getRequestURI())) {
             filterChain.doFilter(request, response);
             return;
         }
 
         LOG.info("Request info:");
         LOG.info("Request Method: {}", cachedBodyHttpServletRequest.getMethod());
-        LOG.info("Request URI: {}", cachedBodyHttpServletRequest.getRequestURI());
+        LOG.info("Request URL: {}", cachedBodyHttpServletRequest.getRequestURL());
         LOG.info("Request body: {}", new String(cachedBodyHttpServletRequest.getInputStream().readAllBytes()));
 
         CachedBodyHttpServletResponse cachedBodyHttpServletResponse =

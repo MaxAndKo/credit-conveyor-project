@@ -1,12 +1,13 @@
 package com.konchalovmaxim.creditconveyorms;
 
-import com.konchalovmaxim.creditconveyorms.config.RatePropertiesConfiguration;
+import com.konchalovmaxim.creditconveyorms.config.HttpProperties;
+import com.konchalovmaxim.creditconveyorms.config.RateProperties;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 
 @SpringBootApplication
-@EnableConfigurationProperties(RatePropertiesConfiguration.class)
+@EnableConfigurationProperties({RateProperties.class, HttpProperties.class})
 public class CreditConveyorMsApplication {
 
     public static void main(String[] args) {

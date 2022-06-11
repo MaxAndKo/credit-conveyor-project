@@ -1,7 +1,6 @@
 package com.konchalovmaxim.creditconveyorms.service;
 
-import com.konchalovmaxim.creditconveyorms.aspect.LoggingAspect;
-import com.konchalovmaxim.creditconveyorms.config.RatePropertiesConfiguration;
+import com.konchalovmaxim.creditconveyorms.config.RateProperties;
 import com.konchalovmaxim.creditconveyorms.dto.*;
 import com.konchalovmaxim.creditconveyorms.enums.EmploymentPosition;
 import com.konchalovmaxim.creditconveyorms.enums.EmploymentStatus;
@@ -9,8 +8,7 @@ import com.konchalovmaxim.creditconveyorms.enums.Gender;
 import com.konchalovmaxim.creditconveyorms.enums.MartialStatus;
 import com.konchalovmaxim.creditconveyorms.exception.CreditNotAvailableException;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -20,18 +18,17 @@ import java.time.Period;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ScoringServiceImpl implements ScoringService{
 
-    private static final Logger LOG = LoggerFactory.getLogger(ScoringServiceImpl.class);
-
-    private final RatePropertiesConfiguration ratePropertiesConfiguration;
+    private final RateProperties rateProperties;
 
     public int getAge(LocalDate birthdate){
         LocalDate currentTime = LocalDate.now();
         Period period = Period.between(birthdate, currentTime);
         int age = period.getYears();
 
-        LOG.info(String.format("Method getAge return age: %d", age));
+        log.debug(String.format("Method getAge return age: %d", age));
 
         return age;
     }
@@ -39,17 +36,17 @@ public class ScoringServiceImpl implements ScoringService{
     public BigDecimal getMonthlyPayment(Integer term, BigDecimal rate, BigDecimal amount) {
         BigDecimal monthlyInterestRate = rate.divide(BigDecimal.valueOf(1200), 10, RoundingMode.HALF_UP);//деление на 100 - получение процентов, на 12 - определение, какую часть от года состаляет
 
-        LOG.info(String.format("Method getMonthlyPayment calculate monthlyInterestRate: %f", monthlyInterestRate));
+        log.debug("Calculate monthlyInterestRate: {}", monthlyInterestRate);
 
         BigDecimal poweredRate = BigDecimal.ONE.add(monthlyInterestRate).pow(term);
         BigDecimal annuityCoef = monthlyInterestRate.multiply(poweredRate).
-                divide(poweredRate.subtract(BigDecimal.valueOf(1)), 10, RoundingMode.HALF_UP);
+                divide(poweredRate.subtract(BigDecimal.ONE), 10, RoundingMode.HALF_UP);
 
-        LOG.info(String.format("Method getMonthlyPayment calculate annuity coefficient: %f", annuityCoef));
+        log.debug("Calculate annuity coefficient: {}", annuityCoef);
 
         BigDecimal monthlyPayment = annuityCoef.multiply(amount);
 
-        LOG.info(String.format("Method getMonthlyPayment return monthlyPayment: %f", monthlyPayment));
+        log.debug("getMonthlyPayment return monthlyPayment: {}", monthlyPayment);
         return monthlyPayment.setScale(2, RoundingMode.HALF_UP);
     }
 
@@ -60,43 +57,41 @@ public class ScoringServiceImpl implements ScoringService{
             BigDecimal rate = calculateBaseRate(scoringDataDTO.getIsSalaryClient(),
                     scoringDataDTO.getIsInsuranceEnabled());
 
-            LOG.info(String.format("Method scoring calculate base rate: %f", rate));
-
             if (scoringDataDTO.getEmployment().getEmploymentStatus() == EmploymentStatus.EMPLOYED)
-                rate = rate.add(ratePropertiesConfiguration.getEmployed());
+                rate = rate.add(rateProperties.getEmployed());
             else if (scoringDataDTO.getEmployment().getEmploymentStatus() == EmploymentStatus.BUSINESS_OWNER)
-                rate = rate.add(ratePropertiesConfiguration.getBusinessOwner());
+                rate = rate.add(rateProperties.getBusinessOwner());
 
-            LOG.info(String.format("Method scoring calculate rate with employment status: %f", rate));
+            log.debug("Calculate rate with employment status: {}", rate);
 
             if (scoringDataDTO.getEmployment().getPosition() == EmploymentPosition.MID_MANAGER)
-                rate = rate.add(ratePropertiesConfiguration.getMidManager());
+                rate = rate.add(rateProperties.getMidManager());
             else if (scoringDataDTO.getEmployment().getPosition() == EmploymentPosition.TOP_MANAGER)
-                rate = rate.add(ratePropertiesConfiguration.getTopManager());
+                rate = rate.add(rateProperties.getTopManager());
 
-            LOG.info(String.format("Method scoring calculate rate with employment position: %f", rate));
+            log.debug("Calculate rate with employment position: {}", rate);
 
             if (scoringDataDTO.getMaritalStatus() == MartialStatus.MARRIED)
-                rate = rate.add(ratePropertiesConfiguration.getMarried());
+                rate = rate.add(rateProperties.getMarried());
             else if (scoringDataDTO.getMaritalStatus() == MartialStatus.DIVORCED)
-                rate = rate.add(ratePropertiesConfiguration.getDivorced());
+                rate = rate.add(rateProperties.getDivorced());
 
-            LOG.info(String.format("Method scoring calculate rate with martial status: %f", rate));
+            log.debug("Calculate rate with martial status: {}", rate);
 
             if (scoringDataDTO.getDependentAmount() > 1)
-                rate = rate.add(ratePropertiesConfiguration.getDependentAmount());
+                rate = rate.add(rateProperties.getDependentAmount());
 
-            LOG.info(String.format("Method scoring calculate rate with dependent amount: %f", rate));
+            log.debug("Calculate rate with dependent amount: {}", rate);
 
             int age = getAge(scoringDataDTO.getBirthdate());
 
             if (scoringDataDTO.getGender() == Gender.FEMALE && age >= 35 && age < 60 ||
                     scoringDataDTO.getGender() == Gender.MALE  && age >= 30 && age < 55)
-                rate = rate.add(ratePropertiesConfiguration.getMiddleAge());
+                rate = rate.add(rateProperties.getMiddleAge());
             else if (scoringDataDTO.getGender() == Gender.NON_BINARY)
-                rate = rate.add(ratePropertiesConfiguration.getNonBinary());
+                rate = rate.add(rateProperties.getNonBinary());
 
-            LOG.info(String.format("Method scoring calculate rate with age and gender and return: %f", rate));
+            log.debug("Calculate rate with age and gender and return: {}", rate);
             return rate;
         }
 
@@ -104,49 +99,48 @@ public class ScoringServiceImpl implements ScoringService{
     }
 
     public BigDecimal calculateBaseRate(Boolean isSalaryClient, Boolean isInsuranceEnabled) {
-        BigDecimal rate = ratePropertiesConfiguration.getStandardRate();
+        BigDecimal rate = rateProperties.getStandardRate();
         if (isInsuranceEnabled) {
-            rate = rate.add(ratePropertiesConfiguration.getInsuranceEnabled());
+            rate = rate.add(rateProperties.getInsuranceEnabled());
         }
 
         if (isSalaryClient) {
-            rate = rate.add(ratePropertiesConfiguration.getSalaryClient());
+            rate = rate.add(rateProperties.getSalaryClient());
         }
 
-        LOG.info(String.format("Method calculateBaseRate calculate base rate: %f", rate));
+        log.debug("Calculate base rate: {}", rate);
 
         return rate;
     }
 
     private Boolean isCreditAvailable(ScoringDataDTO scoringDataDTO){
         if (scoringDataDTO.getEmployment().getEmploymentStatus() == EmploymentStatus.UNEMPLOYED) {
-            LOG.info("Method isCreditAvailable return false due employment status");
+            log.debug("IsCreditAvailable return false due employment status");
             return false;
         }
 
         if (scoringDataDTO.getEmployment().getSalary().multiply(BigDecimal.valueOf(20)).
                 compareTo(scoringDataDTO.getAmount()) < 0) {
-            LOG.info("Method isCreditAvailable return false due salary");
+            log.debug("IsCreditAvailable return false due salary");
             return false;
         }
 
         int age = getAge(scoringDataDTO.getBirthdate());
         if  (age < 20 || age > 60) {
-            LOG.info("Method isCreditAvailable return false due age");
+            log.debug("IsCreditAvailable return false due age");
             return false;
         }
 
         if (scoringDataDTO.getEmployment().getWorkExperienceTotal() < 12) {
-            LOG.info("Method isCreditAvailable return false due total work experience");
+            log.debug("IsCreditAvailable return false due total work experience");
             return false;
         }
 
         if (scoringDataDTO.getEmployment().getWorkExperienceCurrent() < 3) {
-            LOG.info("Method isCreditAvailable return false due current work experience");
+            log.debug("IsCreditAvailable return false due current work experience");
             return false;
         }
 
-        LOG.info("Method isCreditAvailable return true");
         return true;
     }
 
