@@ -1,4 +1,4 @@
-package com.konchalovmaxim.creditconveyorms.service;
+package com.konchalovmaxim.creditconveyorms.serviceImpl;
 
 import com.konchalovmaxim.creditconveyorms.config.RateProperties;
 import com.konchalovmaxim.creditconveyorms.dto.*;
@@ -7,6 +7,7 @@ import com.konchalovmaxim.creditconveyorms.enums.EmploymentStatus;
 import com.konchalovmaxim.creditconveyorms.enums.Gender;
 import com.konchalovmaxim.creditconveyorms.enums.MartialStatus;
 import com.konchalovmaxim.creditconveyorms.exception.CreditNotAvailableException;
+import com.konchalovmaxim.creditconveyorms.service.ScoringService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -19,7 +20,7 @@ import java.time.Period;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class ScoringServiceImpl implements ScoringService{
+public class ScoringServiceImpl implements ScoringService {
 
     private final RateProperties rateProperties;
 
@@ -28,7 +29,7 @@ public class ScoringServiceImpl implements ScoringService{
         Period period = Period.between(birthdate, currentTime);
         int age = period.getYears();
 
-        log.debug(String.format("Method getAge return age: %d", age));
+        log.debug("Method getAge return age: {}", age);
 
         return age;
     }
@@ -98,7 +99,7 @@ public class ScoringServiceImpl implements ScoringService{
         throw new CreditNotAvailableException("Заявка не одобрена");
     }
 
-    public BigDecimal calculateBaseRate(Boolean isSalaryClient, Boolean isInsuranceEnabled) {
+    public BigDecimal calculateBaseRate(boolean isSalaryClient, boolean isInsuranceEnabled) {
         BigDecimal rate = rateProperties.getStandardRate();
         if (isInsuranceEnabled) {
             rate = rate.add(rateProperties.getInsuranceEnabled());

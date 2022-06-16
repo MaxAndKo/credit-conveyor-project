@@ -1,8 +1,10 @@
-package com.konchalovmaxim.creditconveyorms.service;
+package com.konchalovmaxim.creditconveyorms.serviceImpl;
 
 import com.konchalovmaxim.creditconveyorms.dto.CreditDTO;
 import com.konchalovmaxim.creditconveyorms.dto.PaymentScheduleElement;
 import com.konchalovmaxim.creditconveyorms.dto.ScoringDataDTO;
+import com.konchalovmaxim.creditconveyorms.service.CreditService;
+import com.konchalovmaxim.creditconveyorms.service.ScoringService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j;
 import lombok.extern.slf4j.Slf4j;
@@ -21,12 +23,12 @@ import static java.time.Duration.between;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class CreditServiceImpl implements CreditService{
+public class CreditServiceImpl implements CreditService {
 
     private final ScoringService scoringService;
 
-    private final BigDecimal DAYS_A_YEAR = BigDecimal.valueOf(365);
-    private final BigDecimal HUNDRED_PERCENT = BigDecimal.valueOf(100);
+    private static final BigDecimal DAYS_A_YEAR = BigDecimal.valueOf(365);
+    private static final BigDecimal HUNDRED_PERCENT = BigDecimal.valueOf(100);
 
     public CreditDTO createCredit(ScoringDataDTO scoringDataDTO) {
 
@@ -65,6 +67,8 @@ public class CreditServiceImpl implements CreditService{
                 subtract(BigDecimal.valueOf(1)).
                 divide(BigDecimal.valueOf(term), 10, RoundingMode.HALF_UP).
                 multiply(HUNDRED_PERCENT);
+
+        log.debug("PSK: {}", psk);
 
         return psk;
     }

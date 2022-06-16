@@ -1,7 +1,9 @@
-package com.konchalovmaxim.creditconveyorms.service;
+package com.konchalovmaxim.creditconveyorms.serviceImpl;
 
 import com.konchalovmaxim.creditconveyorms.dto.LoanApplicationRequestDTO;
 import com.konchalovmaxim.creditconveyorms.dto.LoanOfferDTO;
+import com.konchalovmaxim.creditconveyorms.service.OfferService;
+import com.konchalovmaxim.creditconveyorms.service.ScoringService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -10,7 +12,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class OfferServiceImpl implements OfferService{
+public class OfferServiceImpl implements OfferService {
 
     private final ScoringService scoringService;
 
@@ -23,7 +25,7 @@ public class OfferServiceImpl implements OfferService{
         );
     }
 
-    private LoanOfferDTO calculateOffer(LoanApplicationRequestDTO preScoredRequest, Boolean isInsuranceEnabled, Boolean isSalaryClient) {
+    private LoanOfferDTO calculateOffer(LoanApplicationRequestDTO preScoredRequest, boolean isInsuranceEnabled, boolean isSalaryClient) {
         BigDecimal rate = scoringService.calculateBaseRate(isSalaryClient, isInsuranceEnabled);
 
         BigDecimal monthlyPayment = scoringService.getMonthlyPayment(preScoredRequest.getTerm(), rate, preScoredRequest.getAmount());

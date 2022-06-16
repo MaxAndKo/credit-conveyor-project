@@ -5,5 +5,5 @@ import com.konchalovmaxim.creditconveyorms.dto.ScoringDataDTO;
 
 
 public interface CreditService {
-    public CreditDTO createCredit(ScoringDataDTO scoringDataDTO);
+    CreditDTO createCredit(ScoringDataDTO scoringDataDTO);
 }

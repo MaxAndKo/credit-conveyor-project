@@ -6,5 +6,5 @@ import com.konchalovmaxim.creditconveyorms.dto.LoanOfferDTO;
 import java.util.List;
 
 public interface OfferService {
-    public List<LoanOfferDTO> createOffers(LoanApplicationRequestDTO preScoredRequest);
+    List<LoanOfferDTO> createOffers(LoanApplicationRequestDTO preScoredRequest);
 }

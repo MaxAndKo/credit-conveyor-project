@@ -8,8 +8,8 @@ import java.time.LocalDate;
 
 public interface ScoringService {
 
-    public int getAge(LocalDate birthdate);
-    public BigDecimal getMonthlyPayment(Integer term, BigDecimal rate, BigDecimal amount);
-    public BigDecimal scoring(ScoringDataDTO scoringDataDTO) throws CreditNotAvailableException;
-    public BigDecimal calculateBaseRate(Boolean isSalaryClient, Boolean isInsuranceEnabled);
+    int getAge(LocalDate birthdate);
+    BigDecimal getMonthlyPayment(Integer term, BigDecimal rate, BigDecimal amount);
+    BigDecimal scoring(ScoringDataDTO scoringDataDTO) throws CreditNotAvailableException;
+    BigDecimal calculateBaseRate(boolean isSalaryClient, boolean isInsuranceEnabled);
 }
