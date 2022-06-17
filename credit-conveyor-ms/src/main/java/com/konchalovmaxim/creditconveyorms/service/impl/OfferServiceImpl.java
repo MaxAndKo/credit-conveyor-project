@@ -1,4 +1,4 @@
-package com.konchalovmaxim.creditconveyorms.serviceImpl;
+package com.konchalovmaxim.creditconveyorms.service.impl;
 
 import com.konchalovmaxim.creditconveyorms.dto.LoanApplicationRequestDTO;
 import com.konchalovmaxim.creditconveyorms.dto.LoanOfferDTO;

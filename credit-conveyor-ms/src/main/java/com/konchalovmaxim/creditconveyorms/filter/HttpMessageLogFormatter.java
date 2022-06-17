@@ -11,27 +11,23 @@ import org.springframework.stereotype.Component;
 public class HttpMessageLogFormatter {
 
     public void doLogHttpMessage(HttpMessage httpMessage){
-        String prefix = httpMessage.getKind().prefix;
-
-        StringBuilder stringBuilder = new StringBuilder("\n");
-        stringBuilder.append(String.format("%s Type: %s\n", prefix, httpMessage.getType()));
-
         if (httpMessage.getKind() == HttpMessageKind.REQUEST)
-        {
-            stringBuilder.append(String.format("%s Method: %s\n", prefix, httpMessage.getMethod()));
-            stringBuilder.append(String.format("%s URI: %s\n", prefix, httpMessage.getUri()));
-        }
-        else {
-            stringBuilder.append(String.format("%s Status: %s\n", prefix, httpMessage.getStatus()));
-        }
+            doLogRequest(httpMessage);
+        else
+            doLogResponse(httpMessage);
 
-        stringBuilder.append(String.format("%s Headers: %s\n", prefix, httpMessage.getHeaders()));
+    }
 
-        if (!httpMessage.getBody().isBlank())
-            stringBuilder.append(String.format("%s Body: %s", prefix, httpMessage.getBody()));
+    private void doLogRequest(HttpMessage httpMessage){
+        log.info(String.format("\n%1$s Type: %2$s\n%1$s Method: %3$s\n%1$s URI: %4$s\n%1$s Headers: %5$s\n%1$s Body: %6$s",
+                ">>", httpMessage.getType(), httpMessage.getMethod(), httpMessage.getUri(),
+                httpMessage.getHeaders(), httpMessage.getBody()));
+    }
 
-        log.info(stringBuilder.toString());
-
+    private void doLogResponse(HttpMessage httpMessage){
+        log.info(String.format("\n%1$s Type: %2$s\n%1$s Status: %3$s\n%1$s Headers: %4$s\n%1$s Body: %5$s",
+                "<<", httpMessage.getType(), httpMessage.getStatus(),
+                httpMessage.getHeaders(), httpMessage.getBody()));
     }
 
 }
