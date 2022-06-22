@@ -34,21 +34,17 @@ public class RequestResponseLoggingFilter implements Filter {
 
         if (shouldNotLog(cachedBodyHttpServletRequest.getRequestURI())) {
             filterChain.doFilter(request, response);
-            return;
         }
+        else {
+            httpMessageLogFormatter.doLogHttpMessage(new HttpMessage(cachedBodyHttpServletRequest));
+
+            CachedBodyHttpServletResponse cachedBodyHttpServletResponse =
+                    new CachedBodyHttpServletResponse((HttpServletResponse) response);
+
+            filterChain.doFilter(cachedBodyHttpServletRequest, cachedBodyHttpServletResponse);
 
 
-
-        httpMessageLogFormatter.doLogHttpMessage(new HttpMessage(cachedBodyHttpServletRequest));
-
-        CachedBodyHttpServletResponse cachedBodyHttpServletResponse =
-                new CachedBodyHttpServletResponse((HttpServletResponse) response);
-
-        filterChain.doFilter(cachedBodyHttpServletRequest, cachedBodyHttpServletResponse);
-
-
-
-        httpMessageLogFormatter.doLogHttpMessage(new HttpMessage(cachedBodyHttpServletResponse));
-
+            httpMessageLogFormatter.doLogHttpMessage(new HttpMessage(cachedBodyHttpServletResponse));
+        }
     }
 }

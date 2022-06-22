@@ -114,7 +114,7 @@ public class ScoringServiceImpl implements ScoringService {
         return rate;
     }
 
-    private Boolean isCreditAvailable(ScoringDataDTO scoringDataDTO){
+    public boolean isCreditAvailable(ScoringDataDTO scoringDataDTO){
         if (scoringDataDTO.getEmployment().getEmploymentStatus() == EmploymentStatus.UNEMPLOYED) {
             log.debug("IsCreditAvailable return false due employment status");
             return false;

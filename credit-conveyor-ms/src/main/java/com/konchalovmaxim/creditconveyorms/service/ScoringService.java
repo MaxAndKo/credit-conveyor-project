@@ -12,4 +12,6 @@ public interface ScoringService {
     BigDecimal getMonthlyPayment(Integer term, BigDecimal rate, BigDecimal amount);
     BigDecimal scoring(ScoringDataDTO scoringDataDTO) throws CreditNotAvailableException;
     BigDecimal calculateBaseRate(boolean isSalaryClient, boolean isInsuranceEnabled);
+    boolean isCreditAvailable(ScoringDataDTO scoringDataDTO);
+
 }
