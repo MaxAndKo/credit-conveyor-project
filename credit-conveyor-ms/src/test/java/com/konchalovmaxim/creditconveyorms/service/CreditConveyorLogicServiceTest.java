@@ -6,6 +6,7 @@ import com.konchalovmaxim.creditconveyorms.enums.EmploymentStatus;
 import com.konchalovmaxim.creditconveyorms.enums.Gender;
 import com.konchalovmaxim.creditconveyorms.enums.MartialStatus;
 import com.konchalovmaxim.creditconveyorms.exception.CreditNotAvailableException;
+import com.konchalovmaxim.creditconveyorms.utils.TestUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,19 +38,19 @@ class CreditConveyorLogicServiceTest {
 
     @Test
     void isCreditAvailableShouldReturnsTrue(){
-        assertTrue(scoringService.isCreditAvailable(createScoringDto()));
+        assertTrue(scoringService.isCreditAvailable(TestUtils.createScoringDataDto()));
     }
 
     @Test
     void isCreditAvailableShouldReturnsFalseByEmploymentStatus(){
-        ScoringDataDTO scoringDataDTO = createScoringDto();
+        ScoringDataDTO scoringDataDTO = TestUtils.createScoringDataDto();
         scoringDataDTO.getEmployment().setEmploymentStatus(EmploymentStatus.UNEMPLOYED);
         assertFalse(scoringService.isCreditAvailable(scoringDataDTO));
     }
 
     @Test
     void isCreditAvailableShouldReturnsFalseBySalary(){
-        ScoringDataDTO scoringDataDTO = createScoringDto();
+        ScoringDataDTO scoringDataDTO = TestUtils.createScoringDataDto();
         scoringDataDTO.setAmount(BigDecimal.valueOf(3000));
         scoringDataDTO.getEmployment().setSalary(BigDecimal.TEN);
         assertFalse(scoringService.isCreditAvailable(scoringDataDTO));
@@ -57,7 +58,7 @@ class CreditConveyorLogicServiceTest {
 
     @Test
     void isCreditAvailableShouldReturnsFalseByAge(){
-        ScoringDataDTO scoringDataDTO = createScoringDto();
+        ScoringDataDTO scoringDataDTO = TestUtils.createScoringDataDto();
         scoringDataDTO.setBirthdate(LocalDate.now().minusYears(17));
         scoringDataDTO.setPassportIssueDate(LocalDate.now().minusYears(3));
         assertFalse(scoringService.isCreditAvailable(scoringDataDTO));
@@ -65,32 +66,21 @@ class CreditConveyorLogicServiceTest {
 
     @Test
     void isCreditAvailableShouldReturnsFalseByWorkExperienceTotal(){
-        ScoringDataDTO scoringDataDTO = createScoringDto();
+        ScoringDataDTO scoringDataDTO = TestUtils.createScoringDataDto();
         scoringDataDTO.getEmployment().setWorkExperienceTotal(11);
         assertFalse(scoringService.isCreditAvailable(scoringDataDTO));
     }
 
     @Test
     void isCreditAvailableShouldReturnsFalseByWorkExperienceCurrent(){
-        ScoringDataDTO scoringDataDTO = createScoringDto();
+        ScoringDataDTO scoringDataDTO = TestUtils.createScoringDataDto();
         scoringDataDTO.getEmployment().setWorkExperienceCurrent(2);
         assertFalse(scoringService.isCreditAvailable(scoringDataDTO));
     }
 
     @Test
     void create4OffersShouldReturnsFourCorrectOffers() {
-        LoanApplicationRequestDTO loanApplicationRequestDTO = new LoanApplicationRequestDTO();
-        loanApplicationRequestDTO.setAmount(BigDecimal.valueOf(300000));
-        loanApplicationRequestDTO.setTerm(18);
-        loanApplicationRequestDTO.setFirstName("Иванов");
-        loanApplicationRequestDTO.setLastName("Иван");
-        loanApplicationRequestDTO.setMiddleName("Иванович");
-        loanApplicationRequestDTO.setEmail("ivanov@ivan.iv");
-        loanApplicationRequestDTO.setBirthdate(LocalDate.now().minusYears(20));
-        loanApplicationRequestDTO.setPassportSeries("1234");
-        loanApplicationRequestDTO.setPassportNumber("123456");
-
-        List<LoanOfferDTO> actual = offerService.createOffers(loanApplicationRequestDTO);
+        List<LoanOfferDTO> actual = offerService.createOffers(TestUtils.createLoanApplicationRequestDTO());
 
         List<LoanOfferDTO> expected = createExpectedOffers();
 
@@ -125,7 +115,7 @@ class CreditConveyorLogicServiceTest {
     @Test
     void createCreditShouldThrowsExceptionByAge(){
         CreditNotAvailableException thrown = Assertions.assertThrows(CreditNotAvailableException.class, () -> {
-            ScoringDataDTO scoringDataDTO = createScoringDto();
+            ScoringDataDTO scoringDataDTO = TestUtils.createScoringDataDto();
             scoringDataDTO.setBirthdate(LocalDate.now().minusYears(17));
             scoringDataDTO.setPassportIssueDate(LocalDate.now().minusYears(3));
 
@@ -136,25 +126,11 @@ class CreditConveyorLogicServiceTest {
 
     @Test
     void createCreditShouldReturnsCorrectCredit() {
-        CreditDTO creditDTO = creditService.createCredit(createScoringDto());
+        CreditDTO creditDTO = creditService.createCredit(TestUtils.createScoringDataDto());
 
         assertEquals(BigDecimal.valueOf(16), creditDTO.getRate());
         assertEquals(BigDecimal.valueOf(18856.93), creditDTO.getMonthlyPayment());
         assertEquals(BigDecimal.valueOf(0.73), creditDTO.getPsk());
-    }
-
-    private ScoringDataDTO createScoringDto(){
-        EmploymentDTO employmentDTO = new EmploymentDTO(EmploymentStatus.SELF_EMPLOYED,
-                "123456",BigDecimal.valueOf(100000), EmploymentPosition.OWNER,
-                15, 12);
-
-        ScoringDataDTO scoringDataDTO = new ScoringDataDTO(BigDecimal.valueOf(300000), 18,
-                "Иванов", "Иван", "Иванович", Gender.MALE,
-                LocalDate.now().minusYears(20), "1234", "1234",
-                LocalDate.now(), "УФМС Пенза",
-                MartialStatus.MARRIED, 1, employmentDTO, "account",
-                true, true);
-        return scoringDataDTO;
     }
 
 }
