@@ -15,7 +15,8 @@ import java.util.stream.Collectors;
 @NoArgsConstructor
 @Getter
 public final class HttpMessage {
-    public static final String type = "HTTP";
+    @Getter
+    private static final String type = "HTTP";
     private String headers;
     private String body;
     private String method;
@@ -26,9 +27,9 @@ public final class HttpMessage {
     public HttpMessage(HttpServletRequestWrapper httpServletRequestWrapper) throws IOException {
 
         this.headers = Collections.list(httpServletRequestWrapper.getHeaderNames()).
-                stream().
-                map((String s) -> s = String.format("%s=[%s]", s, httpServletRequestWrapper.getHeader(s))).
-                collect(Collectors.joining());
+                stream()
+                .map((String s) -> s = String.format("%s=[%s]", s, httpServletRequestWrapper.getHeader(s)))
+                .collect(Collectors.joining());
         this.body = new String(httpServletRequestWrapper.getInputStream().readAllBytes());
         this.uri = getFullURL(httpServletRequestWrapper);
         this.method = httpServletRequestWrapper.getMethod();
@@ -50,9 +51,9 @@ public final class HttpMessage {
     public HttpMessage(HttpServletResponseWrapper httpServletResponseWrapper) {
 
         this.headers = httpServletResponseWrapper.getHeaderNames().
-                stream().
-                map((String s) -> s = String.format("%s=[%s]", s, httpServletResponseWrapper.getHeader(s))).
-                collect(Collectors.joining());
+                stream()
+                .map((String s) -> s = String.format("%s=[%s]", s, httpServletResponseWrapper.getHeader(s)))
+                .collect(Collectors.joining());
         if (httpServletResponseWrapper instanceof CachedBodyHttpServletResponse)
             this.body = new String(((CachedBodyHttpServletResponse) httpServletResponseWrapper).getByteArray());
         this.status = String.valueOf(httpServletResponseWrapper.getStatus());
