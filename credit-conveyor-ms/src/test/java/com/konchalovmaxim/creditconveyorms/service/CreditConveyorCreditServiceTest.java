@@ -15,7 +15,7 @@ import java.time.LocalDate;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest
-public class CreditConveyorCreditServiceTest {
+class CreditConveyorCreditServiceTest {
 
     @Autowired
     CreditService creditService;

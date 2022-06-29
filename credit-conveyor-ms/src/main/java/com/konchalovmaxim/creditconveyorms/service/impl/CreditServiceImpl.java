@@ -6,10 +6,7 @@ import com.konchalovmaxim.creditconveyorms.dto.ScoringDataDTO;
 import com.konchalovmaxim.creditconveyorms.service.CreditService;
 import com.konchalovmaxim.creditconveyorms.service.ScoringService;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.log4j.Log4j;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -46,31 +43,14 @@ public class CreditServiceImpl implements CreditService {
 
             creditDTO.setMonthlyPayment(scoringService.getMonthlyPayment(creditDTO.getTerm(), creditDTO.getRate(), creditDTO.getAmount()));
 
-            creditDTO.setPsk(calculatePsk(creditDTO.getMonthlyPayment(), creditDTO.getTerm(), creditDTO.getAmount())
-                    .setScale(2, RoundingMode.HALF_UP));
-
             creditDTO.setPaymentSchedule(getPaymentSchedule(creditDTO));
+
+            creditDTO.setPsk(calculatePsk(creditDTO.getPaymentSchedule(), creditDTO.getAmount()));
+
 
             return creditDTO;
         }
         return null;
-    }
-
-    private BigDecimal calculatePsk(BigDecimal monthlyPayment, Integer term, BigDecimal amount){
-
-        log.debug("Calculating PSK with params: monthlyPayment {}, term {}, amount {}",
-                monthlyPayment, term, amount);
-
-        BigDecimal psk = monthlyPayment.multiply(BigDecimal.valueOf(term));
-
-        psk = psk.divide(amount, 10, RoundingMode.HALF_UP).
-                subtract(BigDecimal.valueOf(1)).
-                divide(BigDecimal.valueOf(term), 10, RoundingMode.HALF_UP).
-                multiply(HUNDRED_PERCENT);
-
-        log.debug("PSK: {}", psk);
-
-        return psk;
     }
 
     private List<PaymentScheduleElement> getPaymentSchedule(CreditDTO creditDTO) {
@@ -112,5 +92,90 @@ public class CreditServiceImpl implements CreditService {
         log.debug("Calculate interest payment: {}", interestPayment);
 
         return interestPayment;
+    }
+
+    private BigDecimal calculatePsk(List<PaymentScheduleElement> paymentSchedule, BigDecimal amount){
+
+        int paymentsCount = paymentSchedule.size() + 1;
+
+        double basePeriod = 30d;
+        double basePeriodsAYear = 365 / basePeriod;
+
+        double[] paymentsWithLoan = getPaymentsWithLoan(paymentSchedule, paymentsCount, amount.doubleValue());
+
+        long[] daysBetweenLoanAndPayment = getDaysBetweenLoanAndPayment(paymentsCount, paymentSchedule);
+
+        double[] termInFractionsOfTheBasePeriod = new double[paymentsCount];
+        double[] numberOfFullBasePeriodsSinceIssue = new double[paymentsCount];
+
+        for (int i = 0; i < paymentsCount; i++){
+            termInFractionsOfTheBasePeriod[i] = (daysBetweenLoanAndPayment[i] % basePeriod) / basePeriod;
+            numberOfFullBasePeriodsSinceIssue[i] = Math.floor(daysBetweenLoanAndPayment[i] / basePeriod);
+        }
+
+        double psk = Math.floor(
+                getBasePeriodInterestRate(paymentsWithLoan,
+                        numberOfFullBasePeriodsSinceIssue,
+                        termInFractionsOfTheBasePeriod,
+                        paymentSchedule.size()
+                ) * basePeriodsAYear * 100 * 1000) / 1000;
+
+        return BigDecimal.valueOf(psk).setScale(2, RoundingMode.HALF_UP);
+    }
+
+    private double getBasePeriodInterestRate(double[] payments,
+                                             double[] numberOfFullBasePeriodsSinceIssue,
+                                             double[] termInFractionsOfTheBasePeriod,
+                                             int paymentsCount){
+        double basePeriodInterestRate = 0;
+        double amountOfPayment = 1;
+        double step = 0.00001;
+
+        while (amountOfPayment > 0) {
+            amountOfPayment = 0;
+
+            for (int k = 0; k <= paymentsCount; k++) {
+                amountOfPayment = amountOfPayment + payments[k] / (
+                        (1 + termInFractionsOfTheBasePeriod[k] * basePeriodInterestRate) *
+                                Math.pow(1 + basePeriodInterestRate, numberOfFullBasePeriodsSinceIssue[k]));
+
+            }
+
+            basePeriodInterestRate = basePeriodInterestRate + step;
+        }
+
+        return basePeriodInterestRate;
+    }
+
+    private long[] getDaysBetweenLoanAndPayment(int paymentsCount, List<PaymentScheduleElement> paymentSchedule){
+
+        LocalDate[] dates = new LocalDate[paymentsCount];
+        dates[0] = paymentSchedule.get(0).getDate().minusMonths(1);
+
+        for (int i = 1; i < paymentsCount; i++){
+            dates[i] = paymentSchedule.get(i - 1).getDate();
+        }
+
+        long[] days = new long[paymentsCount];
+
+        for (int i = 0; i < paymentsCount; i++){
+            days[i] = between(dates[0].atStartOfDay(), dates[i].atStartOfDay()).toDays();
+        }
+
+        return days;
+    }
+
+    private double[] getPaymentsWithLoan(
+            List<PaymentScheduleElement> paymentSchedule,
+            int paymentsCount,
+            double amount){
+        double[] sum = new double[paymentsCount];
+        sum[0] = -amount;
+
+        for (int i = 1; i < paymentsCount; i++){
+            sum[i] = paymentSchedule.get(i - 1).getTotalPayment().doubleValue();
+        }
+
+        return sum;
     }
 }

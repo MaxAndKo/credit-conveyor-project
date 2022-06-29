@@ -35,10 +35,10 @@ class CreditConveyorControllerTest {
 
     @Test
     @SneakyThrows
-    public void calculationShouldReturnCorrectResult(){
+    void calculationShouldReturnCorrectResult(){
         ScoringDataDTO scoringDataDTO = TestUtils.createScoringDataDto();
 
-        byte[] expected = Files.readAllBytes(Paths.get("src\\test\\resources\\expectedJson\\credit.json"));
+        byte[] expected = this.getClass().getClassLoader().getResourceAsStream("expectedJson\\credit.json").readAllBytes();
 
         byte[] actual = mockMvc.perform(
                     post("/conveyor/calculation")
@@ -52,7 +52,7 @@ class CreditConveyorControllerTest {
 
     @Test
     @SneakyThrows
-    public void calculationShouldReturnBadRequest(){
+    void calculationShouldReturnBadRequest(){
         ScoringDataDTO scoringDataDTO = TestUtils.createScoringDataDto();
         scoringDataDTO.setAmount(BigDecimal.valueOf(9999));
 
@@ -66,7 +66,7 @@ class CreditConveyorControllerTest {
 
     @Test
     @SneakyThrows
-    public void calculationShouldReturnNotAcceptable(){
+    void calculationShouldReturnNotAcceptable(){
         ScoringDataDTO scoringDataDTO = TestUtils.createScoringDataDto();
         scoringDataDTO.getEmployment().setEmploymentStatus(EmploymentStatus.UNEMPLOYED);
 
@@ -80,10 +80,10 @@ class CreditConveyorControllerTest {
 
     @Test
     @SneakyThrows
-    public void offerShouldReturnCorrectResult(){
+    void offerShouldReturnCorrectResult(){
         LoanApplicationRequestDTO  loanApplicationRequestDTO = TestUtils.createLoanApplicationRequestDTO();
 
-        byte[] expected = Files.readAllBytes(Paths.get("src\\test\\resources\\expectedJson\\offer.json"));
+        byte[] expected = this.getClass().getClassLoader().getResourceAsStream("expectedJson\\offer.json").readAllBytes();
 
         byte[] actual = mockMvc.perform(
                     post("/conveyor/offers")
@@ -97,7 +97,7 @@ class CreditConveyorControllerTest {
 
     @Test
     @SneakyThrows
-    public void offerShouldReturnBadRequest(){
+    void offerShouldReturnBadRequest(){
         LoanApplicationRequestDTO  loanApplicationRequestDTO = TestUtils.createLoanApplicationRequestDTO();
         loanApplicationRequestDTO.setFirstName("a");
 

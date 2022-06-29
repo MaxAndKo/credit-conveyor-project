@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @SpringBootTest
-public class CreditConveyorScoringServiceTest {
+class CreditConveyorScoringServiceTest {
 
     @Autowired
     ScoringService scoringService;
@@ -24,6 +24,7 @@ public class CreditConveyorScoringServiceTest {
     @Test
     void getAgeShouldReturnsTwenty() {
         LocalDate birthday = LocalDate.now().minusYears(20);
+
         assertEquals(20, scoringService.getAge(birthday));
     }
 
@@ -40,6 +41,7 @@ public class CreditConveyorScoringServiceTest {
         CreditNotAvailableException thrown = Assertions.assertThrows(CreditNotAvailableException.class, () -> {
             scoringService.scoring(scoringDataDTO);
         });
+
         assertEquals("Заявка не одобрена", thrown.getMessage());
     }
 
@@ -48,9 +50,11 @@ public class CreditConveyorScoringServiceTest {
         ScoringDataDTO scoringDataDTO = TestUtils.createScoringDataDto();
         scoringDataDTO.setAmount(BigDecimal.valueOf(3000));
         scoringDataDTO.getEmployment().setSalary(BigDecimal.TEN);
+
         CreditNotAvailableException thrown = Assertions.assertThrows(CreditNotAvailableException.class, () -> {
             scoringService.scoring(scoringDataDTO);
         });
+
         assertEquals("Заявка не одобрена", thrown.getMessage());
     }
 
@@ -59,9 +63,11 @@ public class CreditConveyorScoringServiceTest {
         ScoringDataDTO scoringDataDTO = TestUtils.createScoringDataDto();
         scoringDataDTO.setBirthdate(LocalDate.now().minusYears(17));
         scoringDataDTO.setPassportIssueDate(LocalDate.now().minusYears(3));
+
         CreditNotAvailableException thrown = Assertions.assertThrows(CreditNotAvailableException.class, () -> {
             scoringService.scoring(scoringDataDTO);
         });
+
         assertEquals("Заявка не одобрена", thrown.getMessage());
     }
 
@@ -69,9 +75,11 @@ public class CreditConveyorScoringServiceTest {
     void scoringShouldThrowsExceptionByWorkExperienceTotal(){
         ScoringDataDTO scoringDataDTO = TestUtils.createScoringDataDto();
         scoringDataDTO.getEmployment().setWorkExperienceTotal(11);
+
         CreditNotAvailableException thrown = Assertions.assertThrows(CreditNotAvailableException.class, () -> {
             scoringService.scoring(scoringDataDTO);
         });
+
         assertEquals("Заявка не одобрена", thrown.getMessage());
     }
 
@@ -79,9 +87,11 @@ public class CreditConveyorScoringServiceTest {
     void scoringShouldThrowsExceptionByWorkExperienceCurrent(){
         ScoringDataDTO scoringDataDTO = TestUtils.createScoringDataDto();
         scoringDataDTO.getEmployment().setWorkExperienceCurrent(2);
+
         CreditNotAvailableException thrown = Assertions.assertThrows(CreditNotAvailableException.class, () -> {
             scoringService.scoring(scoringDataDTO);
         });
+
         assertEquals("Заявка не одобрена", thrown.getMessage());
     }
 }

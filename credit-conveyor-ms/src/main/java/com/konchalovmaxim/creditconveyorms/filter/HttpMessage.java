@@ -26,9 +26,9 @@ public final class HttpMessage {
 
     public HttpMessage(HttpServletRequestWrapper httpServletRequestWrapper) throws IOException {
 
-        this.headers = Collections.list(httpServletRequestWrapper.getHeaderNames()).
-                stream()
-                .map((String s) -> s = String.format("%s=[%s]", s, httpServletRequestWrapper.getHeader(s)))
+        this.headers = Collections.list(httpServletRequestWrapper.getHeaderNames())
+                .stream()
+                .map(s -> s = String.format("%s=[%s]", s, httpServletRequestWrapper.getHeader(s)))
                 .collect(Collectors.joining());
         this.body = new String(httpServletRequestWrapper.getInputStream().readAllBytes());
         this.uri = getFullURL(httpServletRequestWrapper);
@@ -50,9 +50,9 @@ public final class HttpMessage {
 
     public HttpMessage(HttpServletResponseWrapper httpServletResponseWrapper) {
 
-        this.headers = httpServletResponseWrapper.getHeaderNames().
-                stream()
-                .map((String s) -> s = String.format("%s=[%s]", s, httpServletResponseWrapper.getHeader(s)))
+        this.headers = httpServletResponseWrapper.getHeaderNames()
+                .stream()
+                .map(s -> s = String.format("%s=[%s]", s, httpServletResponseWrapper.getHeader(s)))
                 .collect(Collectors.joining());
         if (httpServletResponseWrapper instanceof CachedBodyHttpServletResponse)
             this.body = new String(((CachedBodyHttpServletResponse) httpServletResponseWrapper).getByteArray());
