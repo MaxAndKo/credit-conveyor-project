@@ -1,33 +1,31 @@
 package com.konchalovmaxim.creditconveyorms.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import com.konchalovmaxim.creditconveyorms.enums.EmploymentPosition;
+import com.konchalovmaxim.creditconveyorms.enums.EmploymentStatus;
+import lombok.*;
+
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 
-@Getter
-@Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Data
 public class EmploymentDTO {
 
+    @NotNull
     private EmploymentStatus employmentStatus;
+    @NotEmpty
     private String employerINN;
+    @NotNull
     private BigDecimal salary;
-    private Position position;
+    @NotNull
+    private EmploymentPosition position;
+    @NotNull
     private Integer workExperienceTotal;
+    @NotNull
     private Integer workExperienceCurrent;
 
-    public enum EmploymentStatus{
-        БЕЗРАБОТНЫЙ,
-        САМОЗАНЯТЫЙ,
-        ВЛАДЕЛЕЦ_БИЗНЕСА
-    }
 
-    public enum Position{
-        МЕНЕДЖЕР,
-        ТОП_МЕНЕДЖЕР
-    }
 
 }

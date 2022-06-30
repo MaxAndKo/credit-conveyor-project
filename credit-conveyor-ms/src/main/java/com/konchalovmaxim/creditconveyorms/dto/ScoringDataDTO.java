@@ -1,10 +1,10 @@
 package com.konchalovmaxim.creditconveyorms.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import com.konchalovmaxim.creditconveyorms.enums.Gender;
+import com.konchalovmaxim.creditconveyorms.enums.MartialStatus;
+import lombok.*;
 
+import javax.validation.Valid;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
@@ -12,77 +12,68 @@ import javax.validation.constraints.Size;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
-@Getter
-@Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Data
 public class ScoringDataDTO {
 
-//    @Min(10000)
+    @Min(10000)
+    @NotNull
     private BigDecimal amount;
 
-//    @Min(6)
+    @Min(6)
+    @NotNull
     private Integer term;
 
-//    @NotEmpty
-//    @Size(min = 2, max = 30)
+    @NotEmpty
+    @Size(min = 2, max = 30)
     private String firstName;
 
-//    @NotEmpty
-//    @Size(min = 2, max = 30)
+    @NotEmpty
+    @Size(min = 2, max = 30)
     private String lastName;
 
-//    @Size(min = 2, max = 30)
+    @Size(min = 2, max = 30)
     private String middleName;
 
-//    @NotNull
+    @NotNull
     private Gender gender;
 
-//    @NotNull
+    @NotNull
     private LocalDate birthdate;
 
-//    @NotEmpty
-//    @Size(min = 6, max = 6)
+    @NotEmpty
+    @Size(min = 4, max = 4)
     private String passportSeries;
 
-//    @NotEmpty
-//    @Size(min = 6, max = 6)
+    @NotEmpty
+    @Size(min = 6, max = 6)
     private String passportNumber;
 
-//    @NotNull
+    @NotNull
     private LocalDate passportIssueDate;
 
-//    @NotNull
+    @NotNull
     private String passportIssueBranch;
 
-//    @NotNull
+    @NotNull
     private MartialStatus maritalStatus;
 
-//    @NotNull
+    @NotNull
     private Integer dependentAmount;
 
-//    @NotNull
+    @NotNull
+    @Valid
     private EmploymentDTO employment;
 
-//    @NotNull
+    @NotNull
     private String account;
 
-//    @NotNull
+    @NotNull
     private Boolean isInsuranceEnabled;
 
-//    @NotNull
+    @NotNull
     private Boolean isSalaryClient;
 
-    public enum Gender{
-        МУЖЧИНА,
-        ЖЕНЩИНА,
-        НЕБИНАРНЫЙ
-    }
-
-    public enum MartialStatus{
-        НЕ_В_ОТНОШЕНИЯХ,
-        В_ОТНОШЕНИЯХ,
-        РАЗВЕДЕН
-    }
 
 }
