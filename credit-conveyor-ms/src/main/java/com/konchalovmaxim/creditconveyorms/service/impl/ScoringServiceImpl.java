@@ -1,7 +1,7 @@
 package com.konchalovmaxim.creditconveyorms.service.impl;
 
 import com.konchalovmaxim.creditconveyorms.config.RateProperties;
-import com.konchalovmaxim.creditconveyorms.dto.*;
+import com.konchalovmaxim.creditconveyorms.dto.ScoringDataDTO;
 import com.konchalovmaxim.creditconveyorms.enums.EmploymentPosition;
 import com.konchalovmaxim.creditconveyorms.enums.EmploymentStatus;
 import com.konchalovmaxim.creditconveyorms.enums.Gender;
@@ -24,7 +24,7 @@ public class ScoringServiceImpl implements ScoringService {
 
     private final RateProperties rateProperties;
 
-    public int getAge(LocalDate birthdate){
+    public int getAge(LocalDate birthdate) {
         LocalDate currentTime = LocalDate.now();
         Period period = Period.between(birthdate, currentTime);
         int age = period.getYears();
@@ -53,7 +53,7 @@ public class ScoringServiceImpl implements ScoringService {
 
     public BigDecimal scoring(ScoringDataDTO scoringDataDTO) throws CreditNotAvailableException {
 
-        if (isCreditAvailable(scoringDataDTO)){
+        if (isCreditAvailable(scoringDataDTO)) {
 
             BigDecimal rate = calculateBaseRate(scoringDataDTO.getIsSalaryClient(),
                     scoringDataDTO.getIsInsuranceEnabled());
@@ -87,7 +87,7 @@ public class ScoringServiceImpl implements ScoringService {
             int age = getAge(scoringDataDTO.getBirthdate());
 
             if (scoringDataDTO.getGender() == Gender.FEMALE && age >= 35 && age < 60 ||
-                    scoringDataDTO.getGender() == Gender.MALE  && age >= 30 && age < 55)
+                    scoringDataDTO.getGender() == Gender.MALE && age >= 30 && age < 55)
                 rate = rate.add(rateProperties.getMiddleAge());
             else if (scoringDataDTO.getGender() == Gender.NON_BINARY)
                 rate = rate.add(rateProperties.getNonBinary());
@@ -114,7 +114,7 @@ public class ScoringServiceImpl implements ScoringService {
         return rate;
     }
 
-    private boolean isCreditAvailable(ScoringDataDTO scoringDataDTO){
+    private boolean isCreditAvailable(ScoringDataDTO scoringDataDTO) {
         if (scoringDataDTO.getEmployment().getEmploymentStatus() == EmploymentStatus.UNEMPLOYED) {
             log.debug("IsCreditAvailable return false due employment status");
             return false;
@@ -127,7 +127,7 @@ public class ScoringServiceImpl implements ScoringService {
         }
 
         int age = getAge(scoringDataDTO.getBirthdate());
-        if  (age < 20 || age > 60) {
+        if (age < 20 || age > 60) {
             log.debug("IsCreditAvailable return false due age");
             return false;
         }

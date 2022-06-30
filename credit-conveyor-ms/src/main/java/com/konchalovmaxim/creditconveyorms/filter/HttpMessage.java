@@ -3,8 +3,6 @@ package com.konchalovmaxim.creditconveyorms.filter;
 import com.konchalovmaxim.creditconveyorms.enums.HttpMessageKind;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
-import org.springframework.http.client.support.HttpRequestWrapper;
 
 import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponseWrapper;
@@ -36,18 +34,6 @@ public final class HttpMessage {
         this.kind = HttpMessageKind.REQUEST;
     }
 
-    private static String getFullURL(HttpServletRequestWrapper request) {
-        StringBuilder requestURL = new StringBuilder(request.getRequestURL().toString());
-        String queryString = request.getQueryString();
-
-        if (queryString == null) {
-            return requestURL.toString();
-        }
-        else {
-            return requestURL.append('?').append(queryString).toString();
-        }
-    }
-
     public HttpMessage(HttpServletResponseWrapper httpServletResponseWrapper) {
 
         this.headers = httpServletResponseWrapper.getHeaderNames()
@@ -58,6 +44,17 @@ public final class HttpMessage {
             this.body = new String(((CachedBodyHttpServletResponse) httpServletResponseWrapper).getByteArray());
         this.status = String.valueOf(httpServletResponseWrapper.getStatus());
         this.kind = HttpMessageKind.RESPONSE;
+    }
+
+    private static String getFullURL(HttpServletRequestWrapper request) {
+        StringBuilder requestURL = new StringBuilder(request.getRequestURL().toString());
+        String queryString = request.getQueryString();
+
+        if (queryString == null) {
+            return requestURL.toString();
+        } else {
+            return requestURL.append('?').append(queryString).toString();
+        }
     }
 
 }

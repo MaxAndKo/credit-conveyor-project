@@ -38,6 +38,6 @@ class CreditConveyorCreditServiceTest {
 
         assertEquals(BigDecimal.valueOf(16), creditDTO.getRate());
         assertEquals(BigDecimal.valueOf(18856.93), creditDTO.getMonthlyPayment());
-        assertEquals(BigDecimal.valueOf(0.73), creditDTO.getPsk());
+        assertEquals(BigDecimal.valueOf(16.08), creditDTO.getPsk());
     }
 }

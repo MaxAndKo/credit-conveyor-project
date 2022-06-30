@@ -22,10 +22,9 @@ import static java.time.Duration.between;
 @Slf4j
 public class CreditServiceImpl implements CreditService {
 
-    private final ScoringService scoringService;
-
     private static final BigDecimal DAYS_A_YEAR = BigDecimal.valueOf(365);
     private static final BigDecimal HUNDRED_PERCENT = BigDecimal.valueOf(100);
+    private final ScoringService scoringService;
 
     public CreditDTO createCredit(ScoringDataDTO scoringDataDTO) {
 
@@ -66,20 +65,21 @@ public class CreditServiceImpl implements CreditService {
 
             BigDecimal debtPayment = creditDTO.getMonthlyPayment().subtract(interestPayment).setScale(2, RoundingMode.HALF_UP);
 
-            paymentSchedule.add(new PaymentScheduleElement(i, paymentDate, creditDTO.getMonthlyPayment(), interestPayment, debtPayment, remainder));
-
             remainder = remainder.subtract(debtPayment);
+
+            paymentSchedule.add(new PaymentScheduleElement(i, paymentDate, creditDTO.getMonthlyPayment(), interestPayment, debtPayment, remainder));
         }
 
         PaymentScheduleElement lastElement = paymentSchedule.get(paymentSchedule.size() - 1);
 
         lastElement.setDebtPayment(lastElement.getDebtPayment().add(remainder));
         lastElement.setTotalPayment(lastElement.getTotalPayment().add(remainder));
+        lastElement.setRemainingDebt(lastElement.getRemainingDebt().subtract(remainder));
 
         return paymentSchedule;
     }
 
-    private BigDecimal calculateInterestPayment(BigDecimal remainder, LocalDate paymentDate, BigDecimal rate){
+    private BigDecimal calculateInterestPayment(BigDecimal remainder, LocalDate paymentDate, BigDecimal rate) {
         long countOfDays = between(paymentDate.minusMonths(1).atStartOfDay(), paymentDate.atStartOfDay()).toDays();
 
         log.debug("Payment period: {}", countOfDays);
@@ -94,7 +94,7 @@ public class CreditServiceImpl implements CreditService {
         return interestPayment;
     }
 
-    private BigDecimal calculatePsk(List<PaymentScheduleElement> paymentSchedule, BigDecimal amount){
+    private BigDecimal calculatePsk(List<PaymentScheduleElement> paymentSchedule, BigDecimal amount) {
 
         int paymentsCount = paymentSchedule.size() + 1;
 
@@ -108,7 +108,7 @@ public class CreditServiceImpl implements CreditService {
         double[] termInFractionsOfTheBasePeriod = new double[paymentsCount];
         double[] numberOfFullBasePeriodsSinceIssue = new double[paymentsCount];
 
-        for (int i = 0; i < paymentsCount; i++){
+        for (int i = 0; i < paymentsCount; i++) {
             termInFractionsOfTheBasePeriod[i] = (daysBetweenLoanAndPayment[i] % basePeriod) / basePeriod;
             numberOfFullBasePeriodsSinceIssue[i] = Math.floor(daysBetweenLoanAndPayment[i] / basePeriod);
         }
@@ -126,7 +126,7 @@ public class CreditServiceImpl implements CreditService {
     private double getBasePeriodInterestRate(double[] payments,
                                              double[] numberOfFullBasePeriodsSinceIssue,
                                              double[] termInFractionsOfTheBasePeriod,
-                                             int paymentsCount){
+                                             int paymentsCount) {
         double basePeriodInterestRate = 0;
         double amountOfPayment = 1;
         double step = 0.00001;
@@ -147,18 +147,18 @@ public class CreditServiceImpl implements CreditService {
         return basePeriodInterestRate;
     }
 
-    private long[] getDaysBetweenLoanAndPayment(int paymentsCount, List<PaymentScheduleElement> paymentSchedule){
+    private long[] getDaysBetweenLoanAndPayment(int paymentsCount, List<PaymentScheduleElement> paymentSchedule) {
 
         LocalDate[] dates = new LocalDate[paymentsCount];
         dates[0] = paymentSchedule.get(0).getDate().minusMonths(1);
 
-        for (int i = 1; i < paymentsCount; i++){
+        for (int i = 1; i < paymentsCount; i++) {
             dates[i] = paymentSchedule.get(i - 1).getDate();
         }
 
         long[] days = new long[paymentsCount];
 
-        for (int i = 0; i < paymentsCount; i++){
+        for (int i = 0; i < paymentsCount; i++) {
             days[i] = between(dates[0].atStartOfDay(), dates[i].atStartOfDay()).toDays();
         }
 
@@ -168,11 +168,11 @@ public class CreditServiceImpl implements CreditService {
     private double[] getPaymentsWithLoan(
             List<PaymentScheduleElement> paymentSchedule,
             int paymentsCount,
-            double amount){
+            double amount) {
         double[] sum = new double[paymentsCount];
         sum[0] = -amount;
 
-        for (int i = 1; i < paymentsCount; i++){
+        for (int i = 1; i < paymentsCount; i++) {
             sum[i] = paymentSchedule.get(i - 1).getTotalPayment().doubleValue();
         }
 

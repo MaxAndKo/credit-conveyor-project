@@ -6,8 +6,6 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.reflect.MethodSignature;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
@@ -21,7 +19,7 @@ public class LoggingAspect {
 
     @Around("execution(* com.konchalovmaxim.creditconveyorms.*.*.*(..))")
     public Object aroundAllPublicMethodsAdvice(
-            ProceedingJoinPoint proceedingJoinPoint) throws Throwable{
+            ProceedingJoinPoint proceedingJoinPoint) throws Throwable {
         MethodSignature methodSignature = (MethodSignature) proceedingJoinPoint.getSignature();
 
         //до исполнения метода

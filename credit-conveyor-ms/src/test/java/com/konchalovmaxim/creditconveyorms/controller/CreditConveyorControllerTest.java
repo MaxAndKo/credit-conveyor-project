@@ -38,16 +38,30 @@ class CreditConveyorControllerTest {
     void calculationShouldReturnCorrectResult(){
         ScoringDataDTO scoringDataDTO = TestUtils.createScoringDataDto();
 
-        byte[] expected = this.getClass().getClassLoader().getResourceAsStream("expectedJson\\credit.json").readAllBytes();
+        String expected =new String(this.getClass().getClassLoader().getResourceAsStream("expectedJson\\credit.json").readAllBytes());
 
-        byte[] actual = mockMvc.perform(
+        expected = removeAllDates(expected);
+
+        String actual = mockMvc.perform(
                     post("/conveyor/calculation")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(scoringDataDTO))
                             .accept(MediaType.APPLICATION_JSON)
-            ).andExpect(status().isOk()).andReturn().getResponse().getContentAsByteArray();
+            ).andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
 
-            Assertions.assertArrayEquals(expected, actual);
+        actual = removeAllDates(actual);
+
+            Assertions.assertEquals(expected, actual);
+    }
+
+    private String removeAllDates(String value){
+        StringBuilder sb = new StringBuilder(value);
+        while (sb.indexOf("date") != -1){
+            int start = sb.indexOf("date") - 1;
+            int end = sb.indexOf("\",", start) + 2;
+            sb.delete(start, end);
+        }
+        return sb.toString();
     }
 
     @Test

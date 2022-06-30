@@ -21,7 +21,7 @@ public class RequestResponseLoggingFilter implements Filter {
         this.httpMessageLogFormatter = httpMessageLogFormatter;
     }
 
-    private Boolean shouldNotLog(String URI){
+    private Boolean shouldNotLog(String URI) {
         return httpProp.getExcludeUrls().stream().anyMatch(URI::contains);
     }
 
@@ -34,8 +34,7 @@ public class RequestResponseLoggingFilter implements Filter {
 
         if (shouldNotLog(cachedBodyHttpServletRequest.getRequestURI())) {
             filterChain.doFilter(request, response);
-        }
-        else {
+        } else {
             httpMessageLogFormatter.doLogHttpMessage(new HttpMessage(cachedBodyHttpServletRequest));
 
             CachedBodyHttpServletResponse cachedBodyHttpServletResponse =
