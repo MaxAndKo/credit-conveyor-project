@@ -1,22 +1,18 @@
 package com.konchalovmaxim.dealms.controller;
 
-import com.konchalovmaxim.dealms.dto.LoanApplicationRequestDTO;
-import com.konchalovmaxim.dealms.dto.LoanOfferDTO;
-import com.konchalovmaxim.dealms.dto.ScoringDataDTO;
-import com.konchalovmaxim.dealms.entity.Application;
-import com.konchalovmaxim.dealms.entity.ApplicationStatusHistory;
-import com.konchalovmaxim.dealms.entity.Client;
-import com.konchalovmaxim.dealms.entity.LoanOffer;
+import com.konchalovmaxim.dealms.dto.*;
+import com.konchalovmaxim.dealms.entity.*;
 import com.konchalovmaxim.dealms.enums.ApplicationStatus;
 import com.konchalovmaxim.dealms.enums.ChangeType;
 import com.konchalovmaxim.dealms.exception.CreditConveyorResponseException;
 import com.konchalovmaxim.dealms.exception.NonexistentApplication;
 import com.konchalovmaxim.dealms.service.ApplicationService;
 import com.konchalovmaxim.dealms.service.ClientService;
-import com.konchalovmaxim.dealms.service.PassportService;
+import com.konchalovmaxim.dealms.service.ScoringService;
 import com.konchalovmaxim.dealms.util.FeignServiceUtil;
 import feign.FeignException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -33,14 +29,11 @@ public class DealController {
     private final ClientService clientService;
     private final ApplicationService applicationService;
     private final FeignServiceUtil feignServiceUtil;
-    private final PassportService passportService;
+    private final ScoringService scoringService;
 
     @PostMapping("/application")//TODO перед самой сдачей проверить, правильно ли расставляются статусы
+    @Transactional
     public List<LoanOfferDTO> createApplication(@RequestBody @Valid LoanApplicationRequestDTO requestDTO) {
-//        if (passportService
-//                .notExistWithSeriesAndNumber(
-//                        requestDTO.getPassportSeries(),
-//                        requestDTO.getPassportNumber())) {//TODO надо ли вообще делать такую проверку?
             Client client = new Client(requestDTO);
 
             client = clientService.saveOrReturnExists(client);
@@ -52,7 +45,7 @@ public class DealController {
 
             List<LoanOfferDTO> loanOfferDTOS = feignServiceUtil.getLoanOffers(requestDTO);
 
-            application.setStatus(ApplicationStatus.PREAPPROVAL);
+            application.setStatus(ApplicationStatus.PREAPPROVAL, ChangeType.AUTOMATIC);
 
             for (LoanOfferDTO loanOfferDTO : loanOfferDTOS) {
                 loanOfferDTO.setApplicationId(application.getId());
@@ -61,33 +54,54 @@ public class DealController {
             return loanOfferDTOS;
             }
             catch (FeignException.FeignClientException e){
-                application.setStatus(ApplicationStatus.CC_DENIED);
-                String message = e.getMessage();
-                int startOfError = message.indexOf("error") + 8;
-                int endOfError = message.length() - 3;
-                throw new CreditConveyorResponseException(message.substring(startOfError, endOfError));
+                application.setStatus(ApplicationStatus.CC_DENIED, ChangeType.AUTOMATIC);
+                throw new CreditConveyorResponseException(correctMessage(e.getMessage()));
             }
-
-//        }
-//        throw new ClientAlredyExistsException("Такой клиент уже зарегистрирован");
     }
 
     @PutMapping("/offer")
+    @Transactional
     public void acceptOffer(@RequestBody @Valid LoanOfferDTO loanOfferDTO) {
         Application application = applicationService.findById(loanOfferDTO.getApplicationId());
 
         if (application == null) {
             throw new NonexistentApplication("Заявки с таким id не существует");
         } else {
-            application.getStatusHistories().add(new ApplicationStatusHistory(ChangeType.MANUAL, application));
-            application.setStatus(ApplicationStatus.APPROVED);
+            application.setStatus(ApplicationStatus.APPROVED, ChangeType.AUTOMATIC);
             application.setLoanOffer(new LoanOffer(loanOfferDTO));
-            applicationService.save(application);//TODO проверить будет ли работать без принудительного сохранения
+            applicationService.save(application);
         }
     }
 
     @PutMapping("/calculate/{applicationId}")
-    public void finishCalculation(@RequestBody @Valid ScoringDataDTO scoringDataDTO, @PathVariable Long applicationId) {
-        //TODO выяснить, что должно приходить в запросе
+    @Transactional
+    public void finishCalculation(
+            @RequestBody @Valid FinishRegistrationRequestDTO requestDTO,
+            @PathVariable(required = true) Long applicationId) {
+
+        Application application = applicationService.findById(applicationId);
+
+        if (application == null) {
+            throw new NonexistentApplication("Заявки с таким id не существует");
+        } else {
+            ScoringDataDTO scoringDataDTO = scoringService.prepareScoringData(application, requestDTO);
+
+            try{
+
+                CreditDTO creditDTO = feignServiceUtil.getCredit(scoringDataDTO);
+                application.setCredit(new Credit(creditDTO));
+                application.setStatus(ApplicationStatus.CC_APPROVED, ChangeType.AUTOMATIC);
+
+            } catch (FeignException.FeignClientException e){
+                application.setStatus(ApplicationStatus.CC_DENIED, ChangeType.AUTOMATIC);
+                throw new CreditConveyorResponseException(correctMessage(e.getMessage())) ;
+            }
+        }
+    }
+
+    private String correctMessage(String message){
+        int startOfError = message.indexOf("error") + 8;
+        int endOfError = message.length() - 3;
+        return message.substring(startOfError, endOfError);
     }
 }

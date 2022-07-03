@@ -1,5 +1,7 @@
 package com.konchalovmaxim.dealms.dto;
 
+import com.konchalovmaxim.dealms.entity.Application;
+import com.konchalovmaxim.dealms.entity.Client;
 import com.konchalovmaxim.dealms.enums.Gender;
 import com.konchalovmaxim.dealms.enums.MartialStatus;
 import lombok.*;
@@ -60,6 +62,7 @@ public class ScoringDataDTO {
     private MartialStatus maritalStatus;
 
     @NotNull
+    @Min(0)
     private Integer dependentAmount;
 
     @NotNull
@@ -74,4 +77,5 @@ public class ScoringDataDTO {
 
     @NotNull
     private Boolean isSalaryClient;
+
 }

@@ -17,7 +17,7 @@ public class Passport {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String passportSeries;        //TODO сделать так, чтобы сочетание полей серии и номера было уникальным
+    private String passportSeries;
     private String passportNumber;
     private LocalDate passportIssueDate;
     private String passportIssueBranch;

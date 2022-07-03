@@ -1,6 +1,7 @@
 package com.konchalovmaxim.dealms.entity;
 
 import com.konchalovmaxim.dealms.enums.ApplicationStatus;
+import com.konchalovmaxim.dealms.enums.ChangeType;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -24,7 +25,7 @@ public class Application {
     private Long id;
     @ManyToOne
     private Client client;
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL)
     private Credit credit;
     @Enumerated(value = EnumType.STRING)
     private ApplicationStatus status;
@@ -36,6 +37,13 @@ public class Application {
     @OneToMany(mappedBy = "application", cascade = CascadeType.ALL)
     private List<ApplicationStatusHistory> statusHistories;
 
+    public void setStatus(ApplicationStatus status, ChangeType changeType) {
+        if (this.status != null) {
+            statusHistories.add(new ApplicationStatusHistory(changeType, this));
+        }
+
+        this.status = status;
+    }
 
     public Application(Client client) {
         this.client = client;
