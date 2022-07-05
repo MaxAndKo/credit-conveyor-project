@@ -8,6 +8,7 @@ import lombok.Setter;
 
 import javax.persistence.*;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -39,6 +40,9 @@ public class Application {
 
     public void setStatus(ApplicationStatus status, ChangeType changeType) {
         if (this.status != null) {
+            if (statusHistories == null) {
+                statusHistories = new ArrayList<>();
+            }
             statusHistories.add(new ApplicationStatusHistory(changeType, this));
         }
 

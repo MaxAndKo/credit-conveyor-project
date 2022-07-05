@@ -1,6 +1,7 @@
 package com.konchalovmaxim.dealms.entity;
 
 import com.konchalovmaxim.dealms.dto.LoanOfferDTO;
+import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;

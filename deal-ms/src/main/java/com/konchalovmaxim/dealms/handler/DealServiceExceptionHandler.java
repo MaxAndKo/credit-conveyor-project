@@ -25,8 +25,8 @@ public class DealServiceExceptionHandler {
     }
 
     @ExceptionHandler(value = {NonexistentApplication.class})
-    protected ResponseEntity<ErrorDTO> handleNonexistentApplicationException(CreditConveyorResponseException exception){
-        return ResponseEntity.status(406)
+    protected ResponseEntity<ErrorDTO> handleNonexistentApplicationException(NonexistentApplication exception){
+        return ResponseEntity.status(400)
                 .body(new ErrorDTO(new Date(), "400", exception.getMessage()));
     }
 }

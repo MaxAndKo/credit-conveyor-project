@@ -5,10 +5,12 @@ import com.konchalovmaxim.dealms.dto.ScoringDataDTO;
 import com.konchalovmaxim.dealms.entity.Application;
 import com.konchalovmaxim.dealms.entity.Employment;
 import com.konchalovmaxim.dealms.service.ScoringService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@Slf4j
 public class ScoringServiceImpl implements ScoringService {
 
     @Override
@@ -16,7 +18,9 @@ public class ScoringServiceImpl implements ScoringService {
 
         ScoringDataDTO scoringDataDTO = initializeScoringDto(application, requestDTO);
 
+        log.debug("Application before update: {}", application);
         updateApplication(application, requestDTO);
+        log.debug("Application after update: {}", application);
 
         return scoringDataDTO;
     }
@@ -50,7 +54,7 @@ public class ScoringServiceImpl implements ScoringService {
 
     @Transactional
     protected void updateApplication(Application application, FinishRegistrationRequestDTO requestDTO){
-        application.getClient().getPassport().setPassportIssueBranch(requestDTO.getPassportIssueBranch());
+        application.getClient().getPassport().setPassportIssueBranch(requestDTO.getPassportIssueBranch());//TODO а если клиент уже был и бд и это не первая его заявка, то нужно ли обновлять эти данные или что с ними делать?
         application.getClient().getPassport().setPassportIssueDate(requestDTO.getPassportIssueDate());
         application.getClient().setMaritalStatus(requestDTO.getMaritalStatus());
         application.getClient().setDependentAmount(requestDTO.getDependentAmount());

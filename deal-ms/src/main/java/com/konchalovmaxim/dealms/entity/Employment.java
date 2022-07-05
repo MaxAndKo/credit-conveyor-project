@@ -3,7 +3,10 @@ package com.konchalovmaxim.dealms.entity;
 import com.konchalovmaxim.dealms.dto.EmploymentDTO;
 import com.konchalovmaxim.dealms.enums.EmploymentPosition;
 import com.konchalovmaxim.dealms.enums.EmploymentStatus;
+import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
@@ -11,6 +14,8 @@ import java.math.BigDecimal;
 @Entity
 @Table(name = "t_employments")
 @NoArgsConstructor
+@Getter
+@Setter
 public class Employment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -1,5 +1,6 @@
 package com.konchalovmaxim.dealms.entity;
 
+import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -9,9 +10,9 @@ import java.time.LocalDate;
 
 @Entity
 @Table(name = "t_passports")
-@Setter
-@Getter
 @NoArgsConstructor
+@Getter
+@Setter
 public class Passport {
 
     @Id
