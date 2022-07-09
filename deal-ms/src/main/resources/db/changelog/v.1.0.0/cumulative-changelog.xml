@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.6.xsd">
+
+    <changeSet id="add-tag-1.0.0" author="uPagge">
+        <tagDatabase tag="v.1.0.0"/>
+    </changeSet>
+
+    <include file="create-table-passports.xml" relativeToChangelogFile="true"/>
+    <include file="create-table-employments.xml" relativeToChangelogFile="true"/>
+	<include file="create-table-credits.xml" relativeToChangelogFile="true"/>
+	<include file="create-table-clients.xml" relativeToChangelogFile="true"/>
+	<include file="create-table-payment_schedule_elements.xml" relativeToChangelogFile="true"/>
+	<include file="create-table-loan_offers.xml" relativeToChangelogFile="true"/>
+	<include file="create-table-applications.xml" relativeToChangelogFile="true"/>
+	<include file="create-table-status_history.xml" relativeToChangelogFile="true"/>
+	
+	<include file="create-foreign-keys.xml" relativeToChangelogFile="true"/>
+	<include file="create-sequences.xml" relativeToChangelogFile="true"/>
+
+</databaseChangeLog>
