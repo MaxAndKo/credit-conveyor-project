@@ -138,10 +138,6 @@ public class ApplicationControllerTest {
         HttpMessageLogFormatter httpmessageLogFormatter() {
             return new HttpMessageLogFormatter();
         }
-        @Bean
-        HttpProperties httpProperties(){
-            return new HttpProperties();
-        }
     }
 }
 
