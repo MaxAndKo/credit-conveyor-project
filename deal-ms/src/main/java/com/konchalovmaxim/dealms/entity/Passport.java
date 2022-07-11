@@ -16,7 +16,9 @@ import java.time.LocalDate;
 public class Passport {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(generator = "passport_id_sequence")
+    @SequenceGenerator(name = "passport_id_sequence",
+            sequenceName = "passport_id_sequence", allocationSize = 1)
     private Long id;
     private String passportSeries;
     private String passportNumber;

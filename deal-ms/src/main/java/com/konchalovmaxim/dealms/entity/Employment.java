@@ -18,7 +18,9 @@ import java.math.BigDecimal;
 @Setter
 public class Employment {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(generator = "employment_id_sequence")
+    @SequenceGenerator(name = "employment_id_sequence",
+            sequenceName = "employment_id_sequence", allocationSize = 1)
     private Long id;
     @Enumerated(EnumType.STRING)
     private EmploymentStatus employmentStatus;

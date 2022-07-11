@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
+import java.net.ConnectException;
 import java.util.Date;
 
 @ControllerAdvice
@@ -28,5 +29,10 @@ public class DealServiceExceptionHandler {
     protected ResponseEntity<ErrorDTO> handleNonexistentApplicationException(NonexistentApplication exception){
         return ResponseEntity.status(400)
                 .body(new ErrorDTO(new Date(), "400", exception.getMessage()));
+    }
+        @ExceptionHandler(value = ConnectException.class)
+    protected ResponseEntity<ErrorDTO> handleConnectException(ConnectException exception){
+        return ResponseEntity.status(500)
+                .body(new ErrorDTO(new Date(), "500", "В данный момент сервис недоступен"));
     }
 }

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.6.xsd">
+
+    <changeSet id="create-table-credits" author="KonchalovMaxim">
+        <createTable tableName="t_credits">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="amount" type="number(19,2)"/>
+			<column name="is_insurance_enabled" type="boolean"/>
+			<column name="is_salary_client" type="boolean"/>
+			<column name="monthly_payment" type="number(19,2)"/>
+			<column name="psk" type="number(19,2)"/>
+			<column name="rate" type="number(19,2)"/>
+			<column name="term" type="int"/>
+        </createTable>
+    </changeSet>
+
+</databaseChangeLog>

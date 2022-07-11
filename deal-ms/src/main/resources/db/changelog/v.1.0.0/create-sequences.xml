@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.6.xsd">
+
+    <changeSet id="create-sequences" author="KonchalovMaxim">
+
+        <createSequence cycle="true"
+                        incrementBy="1"
+                        schemaName="public"
+                        sequenceName="application_id_sequence"
+                        startValue="1"/>
+
+        <createSequence cycle="true"
+                        incrementBy="1"
+                        schemaName="public"
+                        sequenceName="application_status_history_id_sequence"
+                        startValue="1"/>
+
+        <createSequence cycle="true"
+                        incrementBy="1"
+                        schemaName="public"
+                        sequenceName="client_id_sequence"
+                        startValue="1"/>
+
+        <createSequence cycle="true"
+                        incrementBy="1"
+                        schemaName="public"
+                        sequenceName="credit_id_sequence"
+                        startValue="1"/>
+
+        <createSequence cycle="true"
+                        incrementBy="1"
+                        schemaName="public"
+                        sequenceName="loan_offer_id_sequence"
+                        startValue="1"/>
+
+        <createSequence cycle="true"
+                        incrementBy="1"
+                        schemaName="public"
+                        sequenceName="payment_id_sequence"
+                        startValue="1"/>
+
+        <createSequence cycle="true"
+                        incrementBy="1"
+                        schemaName="public"
+                        sequenceName="passport_id_sequence"
+                        startValue="1"/>
+
+        <createSequence cycle="true"
+                        incrementBy="1"
+                        schemaName="public"
+                        sequenceName="employment_id_sequence"
+                        startValue="1"/>
+
+    </changeSet>
+</databaseChangeLog>

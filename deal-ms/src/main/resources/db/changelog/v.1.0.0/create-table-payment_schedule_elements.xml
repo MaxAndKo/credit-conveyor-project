@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.6.xsd">
+
+    <changeSet id="create-table-payment_schedule_elements" author="KonchalovMaxim">
+        <createTable tableName="t_payment_schedule_elements">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="date" type="date"/>
+			<column name="interest_payment" type="number(19,2)"/>
+			<column name="number" type="int"/>
+			<column name="remaining_debt" type="number(19,2)"/>
+			<column name="total_payment" type="number(19,2)"/>
+			<column name="credit_id" type="bigint"/>
+        </createTable>
+    </changeSet>
+
+</databaseChangeLog>

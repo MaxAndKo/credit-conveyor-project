@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.6.xsd">
+
+    <changeSet id="create-table-employments" author="KonchalovMaxim">
+        <createTable tableName="t_employments">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="employer" type="varchar(255)"/>
+			<column name="employment_status" type="varchar(255)"/>
+			<column name="position" type="varchar(255)"/>
+			<column name="salary" type="number(19,2)"/>
+			<column name="work_experience_current" type="int"/>
+			<column name="work_experience_total" type="int"/>
+        </createTable>
+    </changeSet>
+
+</databaseChangeLog>

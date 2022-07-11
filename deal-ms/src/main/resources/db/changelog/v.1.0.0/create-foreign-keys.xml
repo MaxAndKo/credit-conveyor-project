@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.6.xsd">
+
+	<changeSet id="create-foreign-keys" author="KonchalovMaxim">
+		
+		<addForeignKeyConstraint baseTableName="t_clients" baseColumnNames="employment_id"
+								constraintName="client_employment_id"
+								referencedTableName="t_employments" referencedColumnNames="id"/>
+								
+		<addForeignKeyConstraint baseTableName="t_clients" baseColumnNames="passport_id"
+								constraintName="client_passport_id"
+								referencedTableName="t_passports" referencedColumnNames="id"/>
+								
+		<addForeignKeyConstraint baseTableName="t_payment_schedule_elements" baseColumnNames="credit_id"
+								constraintName="payment_schedule_element_credit_id"
+								referencedTableName="t_credits" referencedColumnNames="id"/>
+								
+		<addForeignKeyConstraint baseTableName="t_loan_offers" baseColumnNames="application_id"
+								constraintName="loan_offer_application_id"
+								referencedTableName="t_applications" referencedColumnNames="id"/>
+								
+		<addForeignKeyConstraint baseTableName="t_applications" baseColumnNames="client_id"
+								constraintName="application_client_id"
+								referencedTableName="t_clients" referencedColumnNames="id"/>
+								
+		<addForeignKeyConstraint baseTableName="t_applications" baseColumnNames="credit_id"
+								constraintName="application_credit_id"
+								referencedTableName="t_credits" referencedColumnNames="id"/>
+								
+		<addForeignKeyConstraint baseTableName="t_applications" baseColumnNames="loan_offer_id"
+								constraintName="application_loan_offer_id"
+								referencedTableName="t_loan_offers" referencedColumnNames="id"/>
+								
+		<addForeignKeyConstraint baseTableName="t_status_history" baseColumnNames="application_id"
+								constraintName="status_history_application_id"
+								referencedTableName="t_applications" referencedColumnNames="id"/>
+								
+	</changeSet>
+</databaseChangeLog>
