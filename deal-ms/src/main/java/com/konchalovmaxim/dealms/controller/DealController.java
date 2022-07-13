@@ -1,28 +1,13 @@
 package com.konchalovmaxim.dealms.controller;
 
 import com.konchalovmaxim.dealms.dto.*;
-import com.konchalovmaxim.dealms.entity.Application;
-import com.konchalovmaxim.dealms.entity.Client;
-import com.konchalovmaxim.dealms.entity.Credit;
-import com.konchalovmaxim.dealms.entity.LoanOffer;
-import com.konchalovmaxim.dealms.enums.ApplicationStatus;
-import com.konchalovmaxim.dealms.enums.ChangeType;
-import com.konchalovmaxim.dealms.exception.CreditConveyorResponseException;
-import com.konchalovmaxim.dealms.exception.NonexistentApplication;
-import com.konchalovmaxim.dealms.service.ApplicationService;
-import com.konchalovmaxim.dealms.service.ClientService;
-import com.konchalovmaxim.dealms.service.DealService;
-import com.konchalovmaxim.dealms.service.ScoringService;
-import com.konchalovmaxim.dealms.util.FeignServiceUtil;
-import feign.FeignException;
+import com.konchalovmaxim.dealms.enums.Theme;
+import com.konchalovmaxim.dealms.service.*;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -32,6 +17,7 @@ import java.util.List;
 public class DealController {
 
     private final DealService dealService;
+    private final KafkaProducerService kafkaProducerService;
 
     @PostMapping("/application")
     public List<LoanOfferDTO> createApplication(@RequestBody @Valid LoanApplicationRequestDTO requestDTO) {
@@ -50,5 +36,17 @@ public class DealController {
         dealService.finishCalculation(requestDTO, applicationId);
     }
 
+    @PostMapping("/document/{applicationId}/send")
+    public void documentSend(@PathVariable("applicationId") Long applicationId) {
+        kafkaProducerService.sendCreateDocuments(new EmailMessageDTO("someEmailAddress", Theme.SEND_DOCUMENTS, applicationId));
+    }
+
+    @PostMapping("/document/{applicationId}/sign")
+    public void documentsign(@PathVariable("applicationId") Long applicationId) {
+    }
+
+    @PostMapping("/document/{applicationId}/code")
+    public void documentCode(@PathVariable("applicationId") Long applicationId) {
+    }
 
 }

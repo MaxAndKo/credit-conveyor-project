@@ -27,6 +27,4 @@ public class ApplicationController {
     public void acceptOffer(@RequestBody @Valid LoanOfferDTO loanOfferDTO){
         applicationService.acceptOffer(loanOfferDTO);
     }
-
-
 }
