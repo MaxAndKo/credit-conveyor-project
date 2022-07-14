@@ -7,12 +7,10 @@ import com.konchalovmaxim.dealms.entity.Credit;
 import com.konchalovmaxim.dealms.entity.LoanOffer;
 import com.konchalovmaxim.dealms.enums.ApplicationStatus;
 import com.konchalovmaxim.dealms.enums.ChangeType;
+import com.konchalovmaxim.dealms.enums.Theme;
 import com.konchalovmaxim.dealms.exception.CreditConveyorResponseException;
 import com.konchalovmaxim.dealms.exception.NonexistentApplication;
-import com.konchalovmaxim.dealms.service.ApplicationService;
-import com.konchalovmaxim.dealms.service.ClientService;
-import com.konchalovmaxim.dealms.service.DealService;
-import com.konchalovmaxim.dealms.service.ScoringService;
+import com.konchalovmaxim.dealms.service.*;
 import com.konchalovmaxim.dealms.util.FeignServiceUtil;
 import feign.FeignException;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +30,8 @@ public class DealServiceImpl implements DealService {
     private final ApplicationService applicationService;
     private final FeignServiceUtil feignServiceUtil;
     private final ScoringService scoringService;
+    private final KafkaProducerService kafkaProducerService;
+
 
     @Override
     @Transactional
@@ -83,6 +83,7 @@ public class DealServiceImpl implements DealService {
             log.debug("Application loanOffer set on: {}", application.getLoanOffer());
 
             applicationService.save(application);
+            requireFinishRegistration(application);
         }
     }
 
@@ -105,12 +106,52 @@ public class DealServiceImpl implements DealService {
                 application.setStatus(ApplicationStatus.CC_APPROVED, ChangeType.AUTOMATIC);
                 log.debug("Application status set on: {}", application.getStatus());
 
+                requireCreateDocuments(application);
+
             } catch (FeignException.FeignClientException e) {
                 application.setStatus(ApplicationStatus.CC_DENIED, ChangeType.AUTOMATIC);
                 log.debug("Application status set on: {}", application.getStatus());
 
                 throw new CreditConveyorResponseException(correctMessage(e.getMessage()));
             }
+        }
+    }
+        //TODO убрать свою почту и поставить клиентскую
+    private void requireFinishRegistration(Application application){
+        log.info("Request was sent to complete the registration of the application: {}", application);
+        kafkaProducerService.requireFinishRegistration(new EmailMessageDTO("avatar22255@gmail.com", Theme.FINISH_REGISTRATION, application.getId()));
+    }
+
+    private void requireCreateDocuments(Application application){
+        log.info("Request for create documents was sent. Application: {}", application);
+        kafkaProducerService.requireCreateDocuments(new EmailMessageDTO("avatar22255@gmail.com", Theme.CREATE_DOCUMENTS, application.getId()));
+    }
+
+    @Override
+    public void requireDocumentSend(Long applicationId){
+        log.info("Received application id {}", applicationId);
+        Application application = applicationService.findById(applicationId);
+        if (application == null){
+            throw new NonexistentApplication(String.format("Заявки с id = %d не существует", applicationId));
+        }
+        else {
+            log.info("Request for send documents was sent. Application: {}", application);
+            kafkaProducerService.requireSendDocuments(new EmailMessageDTO("avatar22255@gmail.com", Theme.SEND_DOCUMENTS, application.getId()));
+        }
+    }
+
+    @Override
+    public DocumentDTO getDocument(Long applicationId){
+        log.info("Received application id {}", applicationId);
+        Application application = applicationService.findById(applicationId);
+        if (application == null){
+            throw new NonexistentApplication(String.format("Заявки с id = %d не существует", applicationId));
+        }
+        else {
+            DocumentDTO dto = new DocumentDTO(application);
+            log.info("Converted DocumentDTO: {}", dto);
+
+            return dto;
         }
     }
 

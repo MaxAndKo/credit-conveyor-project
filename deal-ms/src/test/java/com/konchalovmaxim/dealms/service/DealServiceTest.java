@@ -37,13 +37,16 @@ public class DealServiceTest {
     private final ApplicationService applicationService;
     private final FeignServiceUtil feignServiceUtil;
     private final ScoringService scoringService;
+    private final KafkaProducerService kafkaProducerService;
 
     public DealServiceTest() {
         clientService = mock(ClientService.class);
         applicationService = mock(ApplicationService.class);
         feignServiceUtil = mock(FeignServiceUtil.class);
         scoringService = mock(ScoringService.class);
-        dealService = new DealServiceImpl(clientService, applicationService, feignServiceUtil, scoringService);
+        kafkaProducerService = mock(KafkaProducerService.class);
+
+        dealService = new DealServiceImpl(clientService, applicationService, feignServiceUtil, scoringService, kafkaProducerService);
     }
 
     @Test

@@ -16,16 +16,12 @@ import java.util.Map;
 public class KafkaTopicConfig {
 
     private final KafkaTopicProperties topics;
-    //private final KafkaProducerProperties kafkaProducerProperties;
-    //TODO variable kafkaProducerProperties might not have been initialized
-
-    @Value("${kafka.producer.bootstrapAddress}")
-    private String bootstrapAddress;
+    private final KafkaProducerProperties kafkaProducerProperties;
 
     @Bean
     public KafkaAdmin kafkaAdmin() {
         Map<String, Object> configs = new HashMap<>();
-        configs.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapAddress);
+        configs.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaProducerProperties.getBootstrapAddress());
         return new KafkaAdmin(configs);
     }
         //TODO можно ли это  делать в цикле?

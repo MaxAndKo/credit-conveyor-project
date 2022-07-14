@@ -54,7 +54,7 @@ public class ScoringServiceImpl implements ScoringService {
 
     @Transactional
     protected void updateApplication(Application application, FinishRegistrationRequestDTO requestDTO){
-        application.getClient().getPassport().setPassportIssueBranch(requestDTO.getPassportIssueBranch());//TODO а если клиент уже был и бд и это не первая его заявка, то нужно ли обновлять эти данные или что с ними делать?
+        application.getClient().getPassport().setPassportIssueBranch(requestDTO.getPassportIssueBranch());
         application.getClient().getPassport().setPassportIssueDate(requestDTO.getPassportIssueDate());
         application.getClient().setMaritalStatus(requestDTO.getMaritalStatus());
         application.getClient().setDependentAmount(requestDTO.getDependentAmount());

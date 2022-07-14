@@ -1,7 +1,6 @@
 package com.konchalovmaxim.dealms.controller;
 
 import com.konchalovmaxim.dealms.dto.*;
-import com.konchalovmaxim.dealms.enums.Theme;
 import com.konchalovmaxim.dealms.service.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
@@ -17,7 +16,6 @@ import java.util.List;
 public class DealController {
 
     private final DealService dealService;
-    private final KafkaProducerService kafkaProducerService;
 
     @PostMapping("/application")
     public List<LoanOfferDTO> createApplication(@RequestBody @Valid LoanApplicationRequestDTO requestDTO) {
@@ -38,15 +36,21 @@ public class DealController {
 
     @PostMapping("/document/{applicationId}/send")
     public void documentSend(@PathVariable("applicationId") Long applicationId) {
-        kafkaProducerService.sendCreateDocuments(new EmailMessageDTO("someEmailAddress", Theme.SEND_DOCUMENTS, applicationId));
+        dealService.requireDocumentSend(applicationId);
     }
 
-    @PostMapping("/document/{applicationId}/sign")
-    public void documentsign(@PathVariable("applicationId") Long applicationId) {
+    @GetMapping("/application/{applicationId}")
+    public DocumentDTO getDocument(@PathVariable("applicationId") Long applicationId){
+        return dealService.getDocument(applicationId);
     }
 
-    @PostMapping("/document/{applicationId}/code")
-    public void documentCode(@PathVariable("applicationId") Long applicationId) {
-    }
+//
+//    @PostMapping("/document/{applicationId}/sign")
+//    public void documentsign(@PathVariable("applicationId") Long applicationId) {
+//    }
+//
+//    @PostMapping("/document/{applicationId}/code")
+//    public void documentCode(@PathVariable("applicationId") Long applicationId) {
+//    }
 
 }

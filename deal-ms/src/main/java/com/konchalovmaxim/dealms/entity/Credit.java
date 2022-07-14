@@ -2,6 +2,7 @@ package com.konchalovmaxim.dealms.entity;
 
 
 import com.konchalovmaxim.dealms.dto.CreditDTO;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
@@ -12,6 +13,7 @@ import java.util.stream.Collectors;
 @Entity
 @Table(name = "t_credits")
 @NoArgsConstructor
+@Getter
 public class Credit {
     @Id
     @GeneratedValue(generator = "credit_id_sequence")

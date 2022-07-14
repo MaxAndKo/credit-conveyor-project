@@ -14,30 +14,31 @@ public class KafkaServiceProducerImpl implements KafkaProducerService {
     private final KafkaTemplate<String, EmailMessageDTO> kafkaTemplate;
     private final KafkaTopicProperties kafkaTopicProperties;
 
-    public void sendFinishRegistration(EmailMessageDTO message) {
+    public void requireFinishRegistration(EmailMessageDTO message) {
         kafkaTemplate.send(kafkaTopicProperties.getFinishRegistration(), message);
     }
 
     @Override
-    public void sendCreateDocuments(EmailMessageDTO message) {
+    public void requireCreateDocuments(EmailMessageDTO message) {
         kafkaTemplate.send(kafkaTopicProperties.getCreateDocuments(), message);
     }
 
-    public void sendSendDocuments(EmailMessageDTO message) {
+    @Override
+    public void requireSendDocuments(EmailMessageDTO message) {
         kafkaTemplate.send(kafkaTopicProperties.getSendDocuments(), message);
     }
-
-    public void sendSes(EmailMessageDTO message) {
-        kafkaTemplate.send(kafkaTopicProperties.getSendSes(), message);
-    }
-
-    public void sendCreditIssued(EmailMessageDTO message) {
-        kafkaTemplate.send(kafkaTopicProperties.getCreditIssued(), message);
-    }
-
-    public void sendApplicationDenied(EmailMessageDTO message) {
-        kafkaTemplate.send(kafkaTopicProperties.getApplicationDenied(), message);
-    }
+//
+//    public void sendSes(EmailMessageDTO message) {
+//        kafkaTemplate.send(kafkaTopicProperties.getSendSes(), message);
+//    }
+//
+//    public void sendCreditIssued(EmailMessageDTO message) {
+//        kafkaTemplate.send(kafkaTopicProperties.getCreditIssued(), message);
+//    }
+//
+//    public void sendApplicationDenied(EmailMessageDTO message) {
+//        kafkaTemplate.send(kafkaTopicProperties.getApplicationDenied(), message);
+//    }
 
 
 }
