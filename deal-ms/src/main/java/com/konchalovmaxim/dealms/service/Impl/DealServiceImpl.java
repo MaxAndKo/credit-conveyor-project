@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Random;
 
 @Service
 @RequiredArgsConstructor
@@ -122,12 +123,15 @@ public class DealServiceImpl implements DealService {
         kafkaProducerService.requireFinishRegistration(new EmailMessageDTO("avatar22255@gmail.com", Theme.FINISH_REGISTRATION, application.getId()));
     }
 
-    private void requireCreateDocuments(Application application){
+    @Transactional
+    void requireCreateDocuments(Application application){
         log.info("Request for create documents was sent. Application: {}", application);
+        application.setStatus(ApplicationStatus.PREPARE_DOCUMENTS);
         kafkaProducerService.requireCreateDocuments(new EmailMessageDTO("avatar22255@gmail.com", Theme.CREATE_DOCUMENTS, application.getId()));
     }
 
     @Override
+    @Transactional
     public void requireDocumentSend(Long applicationId){
         log.info("Received application id {}", applicationId);
         Application application = applicationService.findById(applicationId);
@@ -141,6 +145,7 @@ public class DealServiceImpl implements DealService {
     }
 
     @Override
+    @Transactional
     public DocumentDTO getDocument(Long applicationId){
         log.info("Received application id {}", applicationId);
         Application application = applicationService.findById(applicationId);
@@ -148,6 +153,8 @@ public class DealServiceImpl implements DealService {
             throw new NonexistentApplication(String.format("Заявки с id = %d не существует", applicationId));
         }
         else {
+            application.setStatus(ApplicationStatus.DOCUMENT_CREATED);
+
             DocumentDTO dto = new DocumentDTO(application);
             log.info("Converted DocumentDTO: {}", dto);
 
@@ -155,9 +162,61 @@ public class DealServiceImpl implements DealService {
         }
     }
 
+    @Override
+    @Transactional
+    public void requireSes(Long applicationId){
+        log.info("Received application id {}", applicationId);
+        Application application = applicationService.findById(applicationId);
+        if (application == null){
+            throw new NonexistentApplication(String.format("Заявки с id = %d не существует", applicationId));
+        }
+        else {
+            log.info("Request for send documents was sent. Application: {}", application);
+            kafkaProducerService.requireSendSes(new EmailMessageDTO("avatar22255@gmail.com", Theme.SEND_SES, application.getId()));
+        }
+    }
+
+    @Override
+    @Transactional
+    public String getSes(Long applicationId){
+        log.info("Received application id {}", applicationId);
+        Application application = applicationService.findById(applicationId);
+        if (application == null){
+            throw new NonexistentApplication(String.format("Заявки с id = %d не существует", applicationId));
+        }
+        else {
+            application.setSesCode(createSesCode());
+
+            log.info("Created Ses: {}", application.getSesCode());
+
+            return application.getSesCode();
+        }
+    }
+
+    @Override
+    public void documentCode(Long applicationId){
+//        log.info("Received application id {}", applicationId);
+//        Application application = applicationService.findById(applicationId);
+//        if (application == null){
+//            throw new NonexistentApplication(String.format("Заявки с id = %d не существует", applicationId));
+//        }
+//        else {
+//            if ()
+//            application.setStatus(ApplicationStatus.DOCUMENT_CREATED);
+//
+//        }
+    }
+
+
+
     private String correctMessage(String message) {
         int startOfError = message.indexOf("error") + 8;
         int endOfError = message.length() - 3;
         return message.substring(startOfError, endOfError);
+    }
+    private String createSesCode(){
+        Random rnd = new Random();
+        int number = rnd.nextInt(999999);
+        return String.format("%06d", number);
     }
 }

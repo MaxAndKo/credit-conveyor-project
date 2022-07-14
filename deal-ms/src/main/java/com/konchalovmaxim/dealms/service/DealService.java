@@ -4,6 +4,7 @@ import com.konchalovmaxim.dealms.dto.DocumentDTO;
 import com.konchalovmaxim.dealms.dto.FinishRegistrationRequestDTO;
 import com.konchalovmaxim.dealms.dto.LoanApplicationRequestDTO;
 import com.konchalovmaxim.dealms.dto.LoanOfferDTO;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -15,4 +16,12 @@ public interface DealService {
     void requireDocumentSend(Long applicationId);
 
     DocumentDTO getDocument(Long applicationId);
+
+    @Transactional
+    void requireSes(Long applicationId);
+
+    @Transactional
+    String getSes(Long applicationId);
+
+    void documentCode(Long applicationId);
 }

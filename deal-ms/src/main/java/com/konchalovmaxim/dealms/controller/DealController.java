@@ -39,18 +39,25 @@ public class DealController {
         dealService.requireDocumentSend(applicationId);
     }
 
-    @GetMapping("/application/{applicationId}")
+    @GetMapping("/document/{applicationId}")
     public DocumentDTO getDocument(@PathVariable("applicationId") Long applicationId){
         return dealService.getDocument(applicationId);
     }
 
-//
-//    @PostMapping("/document/{applicationId}/sign")
-//    public void documentsign(@PathVariable("applicationId") Long applicationId) {
-//    }
-//
-//    @PostMapping("/document/{applicationId}/code")
-//    public void documentCode(@PathVariable("applicationId") Long applicationId) {
-//    }
+
+    @PostMapping("/document/{applicationId}/sign")
+    public void documentSign(@PathVariable("applicationId") Long applicationId) {
+        dealService.requireSes(applicationId);
+    }
+
+    @PutMapping("/document/{applicationId}/code")
+    public String getCode(@PathVariable("applicationId") Long applicationId) {
+        return dealService.getSes(applicationId);
+    }
+
+    @PostMapping("/document/{applicationId}/code")
+    public void documentCode(@PathVariable("applicationId") Long applicationId) {
+        dealService.documentCode(applicationId);//TODO не работает
+    }
 
 }
