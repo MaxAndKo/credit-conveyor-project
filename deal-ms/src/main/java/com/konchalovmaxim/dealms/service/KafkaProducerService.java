@@ -8,4 +8,8 @@ public interface KafkaProducerService {
     void requireSendDocuments(EmailMessageDTO message);
 
     void requireSendSes(EmailMessageDTO message);
+
+    void sendCreditIssued(EmailMessageDTO message);
+
+    void sendApplicationDenied(EmailMessageDTO message);
 }

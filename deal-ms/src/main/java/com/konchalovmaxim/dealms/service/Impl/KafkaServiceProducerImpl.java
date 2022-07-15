@@ -32,14 +32,16 @@ public class KafkaServiceProducerImpl implements KafkaProducerService {
     public void requireSendSes(EmailMessageDTO message) {
         kafkaTemplate.send(kafkaTopicProperties.getSendSes(), message);
     }
-//
-//    public void sendCreditIssued(EmailMessageDTO message) {
-//        kafkaTemplate.send(kafkaTopicProperties.getCreditIssued(), message);
-//    }
-//
-//    public void sendApplicationDenied(EmailMessageDTO message) {
-//        kafkaTemplate.send(kafkaTopicProperties.getApplicationDenied(), message);
-//    }
+
+    @Override
+    public void sendCreditIssued(EmailMessageDTO message) {
+        kafkaTemplate.send(kafkaTopicProperties.getCreditIssued(), message);
+    }
+
+    @Override
+    public void sendApplicationDenied(EmailMessageDTO message) {
+        kafkaTemplate.send(kafkaTopicProperties.getApplicationDenied(), message);
+    }
 
 
 }

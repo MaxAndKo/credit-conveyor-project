@@ -10,7 +10,7 @@ import com.konchalovmaxim.dealms.entity.Credit;
 import com.konchalovmaxim.dealms.entity.LoanOffer;
 import com.konchalovmaxim.dealms.enums.ApplicationStatus;
 import com.konchalovmaxim.dealms.exception.CreditConveyorResponseException;
-import com.konchalovmaxim.dealms.exception.NonexistentApplication;
+import com.konchalovmaxim.dealms.exception.ApplicationException;
 import com.konchalovmaxim.dealms.service.Impl.DealServiceImpl;
 import com.konchalovmaxim.dealms.util.FeignServiceUtil;
 import feign.FeignException;
@@ -125,7 +125,7 @@ public class DealServiceTest {
         LoanOfferDTO loanOfferDTO = getCorrectLoanOfferDTO();
         when(applicationService.findById(any())).thenReturn(null);
 
-        Throwable throwable = Assertions.assertThrows(NonexistentApplication.class, () -> {
+        Throwable throwable = Assertions.assertThrows(ApplicationException.class, () -> {
             dealService.acceptOffer(loanOfferDTO);
         });
 
@@ -160,7 +160,7 @@ public class DealServiceTest {
         FinishRegistrationRequestDTO requestDTO = getCorrectFinishRegistrationRequestDTO();
         when(applicationService.findById(applicationId)).thenReturn(new Application());
 
-        Throwable throwable = Assertions.assertThrows(NonexistentApplication.class, () -> {
+        Throwable throwable = Assertions.assertThrows(ApplicationException.class, () -> {
             dealService.finishCalculation(requestDTO, 2L);
         });
 

@@ -23,5 +23,7 @@ public interface DealService {
     @Transactional
     String getSes(Long applicationId);
 
-    void documentCode(Long applicationId);
+    void documentCode(Long applicationId, String code);
+
+    void clientCanceledApplication(Long applicationId);
 }

@@ -24,7 +24,6 @@ public class KafkaTopicConfig {
         configs.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaProducerProperties.getBootstrapAddress());
         return new KafkaAdmin(configs);
     }
-        //TODO можно ли это  делать в цикле?
     @Bean
     public NewTopic topicApplicationDenied() {
         return new NewTopic(topics.getApplicationDenied(), 1, (short) 1);

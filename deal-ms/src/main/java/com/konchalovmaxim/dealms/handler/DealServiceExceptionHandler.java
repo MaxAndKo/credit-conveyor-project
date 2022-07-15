@@ -3,7 +3,7 @@ package com.konchalovmaxim.dealms.handler;
 import com.konchalovmaxim.dealms.dto.ErrorDTO;
 import com.konchalovmaxim.dealms.exception.ClientAlredyExistsException;
 import com.konchalovmaxim.dealms.exception.CreditConveyorResponseException;
-import com.konchalovmaxim.dealms.exception.NonexistentApplication;
+import com.konchalovmaxim.dealms.exception.ApplicationException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -25,8 +25,8 @@ public class DealServiceExceptionHandler {
                 .body(new ErrorDTO(new Date(), "406", exception.getMessage()));
     }
 
-    @ExceptionHandler(value = {NonexistentApplication.class})
-    protected ResponseEntity<ErrorDTO> handleNonexistentApplicationException(NonexistentApplication exception){
+    @ExceptionHandler(value = {ApplicationException.class})
+    protected ResponseEntity<ErrorDTO> handleNonexistentApplicationException(ApplicationException exception){
         return ResponseEntity.status(400)
                 .body(new ErrorDTO(new Date(), "400", exception.getMessage()));
     }

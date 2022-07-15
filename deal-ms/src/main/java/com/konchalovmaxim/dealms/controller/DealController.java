@@ -56,8 +56,13 @@ public class DealController {
     }
 
     @PostMapping("/document/{applicationId}/code")
-    public void documentCode(@PathVariable("applicationId") Long applicationId) {
-        dealService.documentCode(applicationId);//TODO не работает
+    public void documentCode(@PathVariable("applicationId") Long applicationId, @RequestBody @Valid String code) {
+        dealService.documentCode(applicationId, code);
+    }
+
+    @PutMapping("/application/{applicationId}")
+    public void clientCanceledApplication(@PathVariable("applicationId") Long applicationId){
+        dealService.clientCanceledApplication(applicationId);
     }
 
 }

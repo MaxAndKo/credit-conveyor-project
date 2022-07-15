@@ -66,6 +66,34 @@ public class KafkaConsumerService {
         emailService.sendSimpleEmail(email, "Подпишите ваши документы", "Подпишите ваши документы с помощью данного кода: " + sesCode);
     }
 
+    @KafkaListener(topics = "${kafka.topic.creditIssued}" , groupId = "${kafka.producer.groupId}",  containerFactory = "kafkaListenerContainerFactory")
+    public void listenCreditIssued(String message) {
+        log.info("Received Message: {}", message);
+
+        Long applicationId = getApplicationIdFromJsonString(message);
+        if (applicationId == null){
+            throw new RuntimeException("applicationId is null");
+        }
+
+        String email = getEmailFromJsonString(message);
+
+        emailService.sendSimpleEmail(email, "Кредит успешно выдан!", "Кредит успешно выдан! Спасибо за то, что выбрали нас");
+    }
+
+    @KafkaListener(topics = "${kafka.topic.applicationDenied}" , groupId = "${kafka.producer.groupId}",  containerFactory = "kafkaListenerContainerFactory")
+    public void listenApplicationDenied(String message) {
+        log.info("Received Message: {}", message);
+
+        Long applicationId = getApplicationIdFromJsonString(message);
+        if (applicationId == null){
+            throw new RuntimeException("applicationId is null");
+        }
+
+        String email = getEmailFromJsonString(message);
+
+        emailService.sendSimpleEmail(email, "Ваш кредит отклонен", "Ваш кредит отклонен.");
+    }
+
     private String getEmailFromJsonString(String json){
         int start = json.indexOf("address") + 10;
         int end = json.indexOf("\",", start);
@@ -98,43 +126,4 @@ public class KafkaConsumerService {
         return stringBuilder.toString();
     }
 
-//    @KafkaListener(
-//            topics = "${kafka.topic.createDocuments}" ,
-//            groupId = "${kafka.producer.groupId}",
-//            containerFactory = "kafkaListenerContainerFactory")
-//    public void listenCreateDocuments(String message) {
-//        log.info("Received Message: {}", message);
-//    }
-//
-//    @KafkaListener(
-//            topics = "${kafka.topic.sendDocuments}" ,
-//            groupId = "${kafka.producer.groupId}",
-//            containerFactory = "kafkaListenerContainerFactory")
-//    public void listenSendDocuments(String message) {
-//        log.info("Received Message: {}", message);
-//    }
-//
-//    @KafkaListener(
-//            topics = "${kafka.topic.sendSes}" ,
-//            groupId = "${kafka.producer.groupId}",
-//            containerFactory = "kafkaListenerContainerFactory")
-//    public void listenSendSes(String message) {
-//        log.info("Received Message: {}", message);
-//    }
-//
-//    @KafkaListener(
-//            topics = "${kafka.topic.creditIssued}" ,
-//            groupId = "${kafka.producer.groupId}",
-//            containerFactory = "kafkaListenerContainerFactory")
-//    public void listenCreditIssued(String message) {
-//        log.info("Received Message: {}", message);
-//    }
-//
-//    @KafkaListener(
-//            topics = "${kafka.topic.applicationDenied}" ,
-//            groupId = "${kafka.producer.groupId}",
-//            containerFactory = "kafkaListenerContainerFactory")
-//    public void listenApplicationDenied(String message) {
-//        log.info("Received Message: {}", message);
-//    }
 }

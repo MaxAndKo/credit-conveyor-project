@@ -9,7 +9,7 @@ import com.konchalovmaxim.dealms.enums.ApplicationStatus;
 import com.konchalovmaxim.dealms.enums.ChangeType;
 import com.konchalovmaxim.dealms.enums.Theme;
 import com.konchalovmaxim.dealms.exception.CreditConveyorResponseException;
-import com.konchalovmaxim.dealms.exception.NonexistentApplication;
+import com.konchalovmaxim.dealms.exception.ApplicationException;
 import com.konchalovmaxim.dealms.service.*;
 import com.konchalovmaxim.dealms.util.FeignServiceUtil;
 import feign.FeignException;
@@ -75,7 +75,7 @@ public class DealServiceImpl implements DealService {
         log.debug("Found application: {}", application);
 
         if (application == null) {
-            throw new NonexistentApplication("Заявки с таким id не существует");
+            throw new ApplicationException("Заявки с таким id не существует");
         } else {
             application.setStatus(ApplicationStatus.APPROVED, ChangeType.AUTOMATIC);
             log.debug("Application status set on: {}", application.getStatus());
@@ -95,7 +95,7 @@ public class DealServiceImpl implements DealService {
         log.debug("Found application: {}", application);
 
         if (application == null) {
-            throw new NonexistentApplication("Заявки с таким id не существует");
+            throw new ApplicationException("Заявки с таким id не существует");
         } else {
             ScoringDataDTO scoringDataDTO = scoringService.prepareScoringData(application, requestDTO);
             log.debug("Received scoringData: {}", scoringDataDTO);
@@ -117,42 +117,51 @@ public class DealServiceImpl implements DealService {
             }
         }
     }
-        //TODO убрать свою почту и поставить клиентскую
-    private void requireFinishRegistration(Application application){
+
+    private void requireFinishRegistration(Application application) {
         log.info("Request was sent to complete the registration of the application: {}", application);
-        kafkaProducerService.requireFinishRegistration(new EmailMessageDTO("avatar22255@gmail.com", Theme.FINISH_REGISTRATION, application.getId()));
+        kafkaProducerService.requireFinishRegistration(
+                new EmailMessageDTO(
+                        application.getClient().getEmail(),
+                        Theme.FINISH_REGISTRATION,
+                        application.getId()));
     }
 
-    @Transactional
-    void requireCreateDocuments(Application application){
+    private void requireCreateDocuments(Application application) {
         log.info("Request for create documents was sent. Application: {}", application);
-        application.setStatus(ApplicationStatus.PREPARE_DOCUMENTS);
-        kafkaProducerService.requireCreateDocuments(new EmailMessageDTO("avatar22255@gmail.com", Theme.CREATE_DOCUMENTS, application.getId()));
+        kafkaProducerService.requireCreateDocuments(
+                new EmailMessageDTO(
+                        application.getClient().getEmail(),
+                        Theme.CREATE_DOCUMENTS,
+                        application.getId()));
     }
 
     @Override
     @Transactional
-    public void requireDocumentSend(Long applicationId){
+    public void requireDocumentSend(Long applicationId) {
         log.info("Received application id {}", applicationId);
         Application application = applicationService.findById(applicationId);
-        if (application == null){
-            throw new NonexistentApplication(String.format("Заявки с id = %d не существует", applicationId));
-        }
-        else {
+        if (application == null) {
+            throw new ApplicationException(String.format("Заявки с id = %d не существует", applicationId));
+        } else {
+            application.setStatus(ApplicationStatus.PREPARE_DOCUMENTS);
             log.info("Request for send documents was sent. Application: {}", application);
-            kafkaProducerService.requireSendDocuments(new EmailMessageDTO("avatar22255@gmail.com", Theme.SEND_DOCUMENTS, application.getId()));
+            kafkaProducerService.requireSendDocuments(
+                    new EmailMessageDTO(
+                            application.getClient().getEmail(),
+                            Theme.SEND_DOCUMENTS,
+                            application.getId()));
         }
     }
 
     @Override
     @Transactional
-    public DocumentDTO getDocument(Long applicationId){
+    public DocumentDTO getDocument(Long applicationId) {
         log.info("Received application id {}", applicationId);
         Application application = applicationService.findById(applicationId);
-        if (application == null){
-            throw new NonexistentApplication(String.format("Заявки с id = %d не существует", applicationId));
-        }
-        else {
+        if (application == null) {
+            throw new ApplicationException(String.format("Заявки с id = %d не существует", applicationId));
+        } else {
             application.setStatus(ApplicationStatus.DOCUMENT_CREATED);
 
             DocumentDTO dto = new DocumentDTO(application);
@@ -164,27 +173,29 @@ public class DealServiceImpl implements DealService {
 
     @Override
     @Transactional
-    public void requireSes(Long applicationId){
+    public void requireSes(Long applicationId) {
         log.info("Received application id {}", applicationId);
         Application application = applicationService.findById(applicationId);
-        if (application == null){
-            throw new NonexistentApplication(String.format("Заявки с id = %d не существует", applicationId));
-        }
-        else {
+        if (application == null) {
+            throw new ApplicationException(String.format("Заявки с id = %d не существует", applicationId));
+        } else {
             log.info("Request for send documents was sent. Application: {}", application);
-            kafkaProducerService.requireSendSes(new EmailMessageDTO("avatar22255@gmail.com", Theme.SEND_SES, application.getId()));
+            kafkaProducerService.requireSendSes(
+                    new EmailMessageDTO(
+                            application.getClient().getEmail(),
+                            Theme.SEND_SES,
+                            application.getId()));
         }
     }
 
     @Override
     @Transactional
-    public String getSes(Long applicationId){
+    public String getSes(Long applicationId) {
         log.info("Received application id {}", applicationId);
         Application application = applicationService.findById(applicationId);
-        if (application == null){
-            throw new NonexistentApplication(String.format("Заявки с id = %d не существует", applicationId));
-        }
-        else {
+        if (application == null) {
+            throw new ApplicationException(String.format("Заявки с id = %d не существует", applicationId));
+        } else {
             application.setSesCode(createSesCode());
 
             log.info("Created Ses: {}", application.getSesCode());
@@ -194,19 +205,54 @@ public class DealServiceImpl implements DealService {
     }
 
     @Override
-    public void documentCode(Long applicationId){
-//        log.info("Received application id {}", applicationId);
-//        Application application = applicationService.findById(applicationId);
-//        if (application == null){
-//            throw new NonexistentApplication(String.format("Заявки с id = %d не существует", applicationId));
-//        }
-//        else {
-//            if ()
-//            application.setStatus(ApplicationStatus.DOCUMENT_CREATED);
-//
-//        }
+    public void documentCode(Long applicationId, String code) {
+        log.info("Received application id {}", applicationId);
+        Application application = applicationService.findById(applicationId);
+        if (application == null) {
+            throw new ApplicationException(String.format("Заявки с id = %d не существует", applicationId));
+        } else {
+            if (application.getSesCode().equals(code)) {
+                application.setStatus(ApplicationStatus.DOCUMENT_SIGNED);
+                creditIssued(applicationId);
+            } else {
+                throw new ApplicationException("Неверный код");
+            }
+        }
     }
 
+    @Transactional
+    void creditIssued(Long applicationId) {//принимает Id, так как по идее должен вызываться из метода контроллера, но пока неизвестно какого
+        log.info("Received application id {}", applicationId);
+        Application application = applicationService.findById(applicationId);
+        if (application == null) {
+            throw new ApplicationException(String.format("Заявки с id = %d не существует", applicationId));
+        } else {
+            application.setStatus(ApplicationStatus.CREDIT_ISSUED);
+            kafkaProducerService.sendCreditIssued(
+                    new EmailMessageDTO(
+                            application.getClient().getEmail(),
+                            Theme.CREDIT_ISSUED,
+                            application.getId()));
+        }
+    }
+
+    @Override
+    public void clientCanceledApplication(Long applicationId){
+        log.info("Received application id {}", applicationId);
+        Application application = applicationService.findById(applicationId);
+        if (application == null) {
+            throw new ApplicationException(String.format("Заявки с id = %d не существует", applicationId));
+        } else {
+            application.setStatus(ApplicationStatus.CLIENT_DENIED);
+            kafkaProducerService.sendApplicationDenied(
+                    new EmailMessageDTO(
+                            application.getClient().getEmail(),
+                            Theme.APPLICATION_DENIED,
+                            application.getId()
+                    )
+            );
+        }
+    }
 
 
     private String correctMessage(String message) {
