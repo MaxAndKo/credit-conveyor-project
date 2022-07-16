@@ -140,8 +140,12 @@ public class DealServiceTest {
         FinishRegistrationRequestDTO requestDTO = getCorrectFinishRegistrationRequestDTO();
         Application application = new Application();
         application.setId(applicationId);
+        Client client = new Client();
+        client.setEmail("some_email@mail.com");
+        application.setClient(client);
         when(applicationService.findById(any())).thenReturn(application);
         when(scoringService.prepareScoringData(any(), any())).thenReturn(null);
+
         CreditDTO creditDTO = new CreditDTO();
         creditDTO.setPaymentSchedule(new ArrayList<>());
         creditDTO.setAmount(BigDecimal.valueOf(47457457));

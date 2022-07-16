@@ -6,9 +6,6 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
-import javax.mail.MessagingException;
-import java.io.FileNotFoundException;
-
 @Service
 @RequiredArgsConstructor
 public class EmailServiceImpl implements EmailService {
@@ -17,7 +14,7 @@ public class EmailServiceImpl implements EmailService {
 
     @Override
     public void sendSimpleEmail(String toAddress, String subject, String message) {
-
+        
         SimpleMailMessage mailMessage = new SimpleMailMessage();
         mailMessage.setTo(toAddress);
         mailMessage.setSubject(subject);

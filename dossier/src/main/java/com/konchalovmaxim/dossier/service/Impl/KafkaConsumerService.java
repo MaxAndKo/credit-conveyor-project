@@ -1,5 +1,6 @@
 package com.konchalovmaxim.dossier.service.Impl;
 
+import com.konchalovmaxim.dossier.config.MessageTextProperties;
 import com.konchalovmaxim.dossier.dto.DocumentDTO;
 import com.konchalovmaxim.dossier.service.EmailService;
 import com.konchalovmaxim.dossier.util.FeignUtil;
@@ -15,24 +16,31 @@ public class KafkaConsumerService {
 
     private final EmailService emailService;
     private final FeignUtil feignUtil;
+    private final MessageTextProperties messageTextProperties;
 
     @KafkaListener(topics = "${kafka.topic.finishRegistration}" , groupId = "${kafka.producer.groupId}",  containerFactory = "kafkaListenerContainerFactory")
     public void listenFinishRegistration(String message) {
-        log.info("Received Message: {}", message);
+        log.info("Received Message from finish-registration: {}", message);
         String email = getEmailFromJsonString(message);
-        emailService.sendSimpleEmail(email, "Завершите оформление кредита", "\"Ссылка на завершение оформления\"");
+        emailService.sendSimpleEmail(
+                email,
+                messageTextProperties.getFinishRegistrationSubject(),
+                messageTextProperties.getFinishRegistrationMessage());
     }
 
     @KafkaListener(topics = "${kafka.topic.createDocuments}" , groupId = "${kafka.producer.groupId}",  containerFactory = "kafkaListenerContainerFactory")
     public void listenCreateDocuments(String message) {
-        log.info("Received Message: {}", message);
+        log.info("Received Message: {} from createD=-documents", message);
         String email = getEmailFromJsonString(message);
-        emailService.sendSimpleEmail(email, "Подтвердите начало оформления документов", "\"Ссылка на подтверждение оформления документов\"");
+        emailService.sendSimpleEmail(
+                email,
+                messageTextProperties.getCreateDocumentsSubject(),
+                messageTextProperties.getCreateDocumentsMessage());
     }
 
     @KafkaListener(topics = "${kafka.topic.sendDocuments}" , groupId = "${kafka.producer.groupId}",  containerFactory = "kafkaListenerContainerFactory")
     public void listenSendDocuments(String message) {
-        log.info("Received Message: {}", message);
+        log.info("Received Message: {} from send-documents", message);
 
         Long applicationId = getApplicationIdFromJsonString(message);
         if (applicationId == null){
@@ -46,12 +54,12 @@ public class KafkaConsumerService {
 
         String document = createDocument(dto);
 
-        emailService.sendSimpleEmail(email, "Ваши документы оформлены", document);
+        emailService.sendSimpleEmail(email, messageTextProperties.getSendDocumentsSubject(), document);
     }
 
     @KafkaListener(topics = "${kafka.topic.sendSes}" , groupId = "${kafka.producer.groupId}",  containerFactory = "kafkaListenerContainerFactory")
     public void listenSendSes(String message) {
-        log.info("Received Message: {}", message);
+        log.info("Received Message: {} from send-ses", message);
 
         Long applicationId = getApplicationIdFromJsonString(message);
         if (applicationId == null){
@@ -63,12 +71,15 @@ public class KafkaConsumerService {
 
         String email = getEmailFromJsonString(message);
 
-        emailService.sendSimpleEmail(email, "Подпишите ваши документы", "Подпишите ваши документы с помощью данного кода: " + sesCode);
+        emailService.sendSimpleEmail(
+                email,
+                messageTextProperties.getSendSesSubject(),
+                messageTextProperties.getSendSesMessage() + sesCode);
     }
 
     @KafkaListener(topics = "${kafka.topic.creditIssued}" , groupId = "${kafka.producer.groupId}",  containerFactory = "kafkaListenerContainerFactory")
     public void listenCreditIssued(String message) {
-        log.info("Received Message: {}", message);
+        log.info("Received Message: {} from credit-issued", message);
 
         Long applicationId = getApplicationIdFromJsonString(message);
         if (applicationId == null){
@@ -77,12 +88,15 @@ public class KafkaConsumerService {
 
         String email = getEmailFromJsonString(message);
 
-        emailService.sendSimpleEmail(email, "Кредит успешно выдан!", "Кредит успешно выдан! Спасибо за то, что выбрали нас");
+        emailService.sendSimpleEmail(
+                email,
+                messageTextProperties.getCreditIssuedSubject(),
+                messageTextProperties.getCreditIssuedMessage());
     }
 
     @KafkaListener(topics = "${kafka.topic.applicationDenied}" , groupId = "${kafka.producer.groupId}",  containerFactory = "kafkaListenerContainerFactory")
     public void listenApplicationDenied(String message) {
-        log.info("Received Message: {}", message);
+        log.info("Received Message: {} from application-denied", message);
 
         Long applicationId = getApplicationIdFromJsonString(message);
         if (applicationId == null){
@@ -91,7 +105,10 @@ public class KafkaConsumerService {
 
         String email = getEmailFromJsonString(message);
 
-        emailService.sendSimpleEmail(email, "Ваш кредит отклонен", "Ваш кредит отклонен.");
+        emailService.sendSimpleEmail(
+                email,
+                messageTextProperties.getApplicationDeniedSubject(),
+                messageTextProperties.getApplicationDeniedMessage());
     }
 
     private String getEmailFromJsonString(String json){
@@ -117,12 +134,20 @@ public class KafkaConsumerService {
         return stringId != null ? Long.parseLong(stringId) : null;
     }
     private String createDocument(DocumentDTO dto){
-        StringBuilder stringBuilder = new StringBuilder("Уважаемый ");
-        stringBuilder.append(dto.getFirstName() + " " + dto.getLastName());
-        stringBuilder.append(", документы для вашего кредита суммой ");
-        stringBuilder.append(dto.getAmount());
-        stringBuilder.append(" оформлены и готовы к вашей подписи. Перейдите по следующей ссылке для их подписания: \"Ссылка для подписания\"");
-
+        StringBuilder stringBuilder = new StringBuilder(messageTextProperties.getSendDocumentsMessage());
+        stringBuilder.replace(
+                stringBuilder.indexOf("$firstName"),
+                stringBuilder.indexOf("$firstName") + "$firstName".length(),
+                dto.getFirstName());
+        stringBuilder.replace(
+                stringBuilder.indexOf("$lastName"),
+                stringBuilder.indexOf("$lastName") + "$lastName".length(),
+                dto.getLastName());
+        stringBuilder.replace(
+                stringBuilder.indexOf("$loanAmount"),
+                stringBuilder.indexOf("$loanAmount") + "$loanAmount".length(),
+                dto.getAmount().toString());
+        //TODO доделать
         return stringBuilder.toString();
     }
 
