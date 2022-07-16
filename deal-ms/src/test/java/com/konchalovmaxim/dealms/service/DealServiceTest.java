@@ -10,7 +10,7 @@ import com.konchalovmaxim.dealms.entity.Credit;
 import com.konchalovmaxim.dealms.entity.LoanOffer;
 import com.konchalovmaxim.dealms.enums.ApplicationStatus;
 import com.konchalovmaxim.dealms.exception.CreditConveyorResponseException;
-import com.konchalovmaxim.dealms.exception.NonexistentApplication;
+import com.konchalovmaxim.dealms.exception.ApplicationException;
 import com.konchalovmaxim.dealms.service.Impl.DealServiceImpl;
 import com.konchalovmaxim.dealms.util.FeignServiceUtil;
 import feign.FeignException;
@@ -37,13 +37,16 @@ public class DealServiceTest {
     private final ApplicationService applicationService;
     private final FeignServiceUtil feignServiceUtil;
     private final ScoringService scoringService;
+    private final KafkaProducerService kafkaProducerService;
 
     public DealServiceTest() {
         clientService = mock(ClientService.class);
         applicationService = mock(ApplicationService.class);
         feignServiceUtil = mock(FeignServiceUtil.class);
         scoringService = mock(ScoringService.class);
-        dealService = new DealServiceImpl(clientService, applicationService, feignServiceUtil, scoringService);
+        kafkaProducerService = mock(KafkaProducerService.class);
+
+        dealService = new DealServiceImpl(clientService, applicationService, feignServiceUtil, scoringService, kafkaProducerService);
     }
 
     @Test
@@ -106,6 +109,9 @@ public class DealServiceTest {
 
         LoanOfferDTO loanOfferDTO = getCorrectLoanOfferDTO();
         Application application = new Application();
+        Client client = new Client();
+        client.setEmail("some_email@mail.com");
+        application.setClient(client);
         application.setId(applicationId);
         when(applicationService.findById(any())).thenReturn(application);
 
@@ -122,11 +128,11 @@ public class DealServiceTest {
         LoanOfferDTO loanOfferDTO = getCorrectLoanOfferDTO();
         when(applicationService.findById(any())).thenReturn(null);
 
-        Throwable throwable = Assertions.assertThrows(NonexistentApplication.class, () -> {
+        Throwable throwable = Assertions.assertThrows(ApplicationException.class, () -> {
             dealService.acceptOffer(loanOfferDTO);
         });
 
-        Assertions.assertEquals("Заявки с таким id не существует", throwable.getMessage());
+        Assertions.assertEquals("Заявки с id = 5 не существует", throwable.getMessage());
 
     }
 
@@ -137,8 +143,12 @@ public class DealServiceTest {
         FinishRegistrationRequestDTO requestDTO = getCorrectFinishRegistrationRequestDTO();
         Application application = new Application();
         application.setId(applicationId);
+        Client client = new Client();
+        client.setEmail("some_email@mail.com");
+        application.setClient(client);
         when(applicationService.findById(any())).thenReturn(application);
         when(scoringService.prepareScoringData(any(), any())).thenReturn(null);
+
         CreditDTO creditDTO = new CreditDTO();
         creditDTO.setPaymentSchedule(new ArrayList<>());
         creditDTO.setAmount(BigDecimal.valueOf(47457457));
@@ -157,11 +167,11 @@ public class DealServiceTest {
         FinishRegistrationRequestDTO requestDTO = getCorrectFinishRegistrationRequestDTO();
         when(applicationService.findById(applicationId)).thenReturn(new Application());
 
-        Throwable throwable = Assertions.assertThrows(NonexistentApplication.class, () -> {
+        Throwable throwable = Assertions.assertThrows(ApplicationException.class, () -> {
             dealService.finishCalculation(requestDTO, 2L);
         });
 
-        Assertions.assertEquals("Заявки с таким id не существует", throwable.getMessage());
+        Assertions.assertEquals("Заявки с id = 2 не существует", throwable.getMessage());
 
     }
 

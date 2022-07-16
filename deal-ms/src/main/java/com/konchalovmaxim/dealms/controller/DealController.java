@@ -1,28 +1,12 @@
 package com.konchalovmaxim.dealms.controller;
 
 import com.konchalovmaxim.dealms.dto.*;
-import com.konchalovmaxim.dealms.entity.Application;
-import com.konchalovmaxim.dealms.entity.Client;
-import com.konchalovmaxim.dealms.entity.Credit;
-import com.konchalovmaxim.dealms.entity.LoanOffer;
-import com.konchalovmaxim.dealms.enums.ApplicationStatus;
-import com.konchalovmaxim.dealms.enums.ChangeType;
-import com.konchalovmaxim.dealms.exception.CreditConveyorResponseException;
-import com.konchalovmaxim.dealms.exception.NonexistentApplication;
-import com.konchalovmaxim.dealms.service.ApplicationService;
-import com.konchalovmaxim.dealms.service.ClientService;
-import com.konchalovmaxim.dealms.service.DealService;
-import com.konchalovmaxim.dealms.service.ScoringService;
-import com.konchalovmaxim.dealms.util.FeignServiceUtil;
-import feign.FeignException;
+import com.konchalovmaxim.dealms.service.*;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -50,5 +34,35 @@ public class DealController {
         dealService.finishCalculation(requestDTO, applicationId);
     }
 
+    @PostMapping("/document/{applicationId}/send")
+    public void documentSend(@PathVariable("applicationId") Long applicationId) {
+        dealService.requireDocumentSend(applicationId);
+    }
+
+    @GetMapping("/document/{applicationId}")
+    public DocumentDTO getDocument(@PathVariable("applicationId") Long applicationId){
+        return dealService.getDocument(applicationId);
+    }
+
+
+    @PostMapping("/document/{applicationId}/sign")
+    public void documentSign(@PathVariable("applicationId") Long applicationId) {
+        dealService.requireSes(applicationId);
+    }
+
+    @PutMapping("/document/{applicationId}/code")
+    public String getCode(@PathVariable("applicationId") Long applicationId) {
+        return dealService.getSes(applicationId);
+    }
+
+    @PostMapping("/document/{applicationId}/code")
+    public void documentCode(@PathVariable("applicationId") Long applicationId, @RequestBody @Valid String code) {
+        dealService.documentCode(applicationId, code);
+    }
+
+    @PutMapping("/application/{applicationId}")
+    public void clientCanceledApplication(@PathVariable("applicationId") Long applicationId){
+        dealService.clientCanceledApplication(applicationId);
+    }
 
 }
