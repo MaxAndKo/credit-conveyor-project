@@ -109,6 +109,9 @@ public class DealServiceTest {
 
         LoanOfferDTO loanOfferDTO = getCorrectLoanOfferDTO();
         Application application = new Application();
+        Client client = new Client();
+        client.setEmail("some_email@mail.com");
+        application.setClient(client);
         application.setId(applicationId);
         when(applicationService.findById(any())).thenReturn(application);
 
@@ -129,7 +132,7 @@ public class DealServiceTest {
             dealService.acceptOffer(loanOfferDTO);
         });
 
-        Assertions.assertEquals("Заявки с таким id не существует", throwable.getMessage());
+        Assertions.assertEquals("Заявки с id = 5 не существует", throwable.getMessage());
 
     }
 
@@ -168,7 +171,7 @@ public class DealServiceTest {
             dealService.finishCalculation(requestDTO, 2L);
         });
 
-        Assertions.assertEquals("Заявки с таким id не существует", throwable.getMessage());
+        Assertions.assertEquals("Заявки с id = 2 не существует", throwable.getMessage());
 
     }
 
