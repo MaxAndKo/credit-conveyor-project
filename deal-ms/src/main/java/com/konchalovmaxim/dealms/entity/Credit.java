@@ -4,6 +4,7 @@ package com.konchalovmaxim.dealms.entity;
 import com.konchalovmaxim.dealms.dto.CreditDTO;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
@@ -14,6 +15,7 @@ import java.util.stream.Collectors;
 @Table(name = "t_credits")
 @NoArgsConstructor
 @Getter
+@ToString(exclude = "paymentSchedule")
 public class Credit {
     @Id
     @GeneratedValue(generator = "credit_id_sequence")

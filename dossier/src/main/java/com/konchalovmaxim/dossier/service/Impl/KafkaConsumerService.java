@@ -30,7 +30,7 @@ public class KafkaConsumerService {
 
     @KafkaListener(topics = "${kafka.topic.createDocuments}" , groupId = "${kafka.producer.groupId}",  containerFactory = "kafkaListenerContainerFactory")
     public void listenCreateDocuments(String message) {
-        log.info("Received Message: {} from createD=-documents", message);
+        log.info("Received Message from createD=-documents: {}", message);
         String email = getEmailFromJsonString(message);
         emailService.sendSimpleEmail(
                 email,
@@ -40,7 +40,7 @@ public class KafkaConsumerService {
 
     @KafkaListener(topics = "${kafka.topic.sendDocuments}" , groupId = "${kafka.producer.groupId}",  containerFactory = "kafkaListenerContainerFactory")
     public void listenSendDocuments(String message) {
-        log.info("Received Message: {} from send-documents", message);
+        log.info("Received Message from send-documents: {} ", message);
 
         Long applicationId = getApplicationIdFromJsonString(message);
         if (applicationId == null){
@@ -48,7 +48,7 @@ public class KafkaConsumerService {
         }
 
         DocumentDTO dto = feignUtil.getDocumentDTO(applicationId);
-        log.info("Received documentDTO: {}", dto);
+        log.info("Received documentDTO from deal-ms: {}", dto);
 
         String email = getEmailFromJsonString(message);
 
@@ -59,7 +59,7 @@ public class KafkaConsumerService {
 
     @KafkaListener(topics = "${kafka.topic.sendSes}" , groupId = "${kafka.producer.groupId}",  containerFactory = "kafkaListenerContainerFactory")
     public void listenSendSes(String message) {
-        log.info("Received Message: {} from send-ses", message);
+        log.info("Received Message from send-ses: {} ", message);
 
         Long applicationId = getApplicationIdFromJsonString(message);
         if (applicationId == null){
@@ -67,7 +67,7 @@ public class KafkaConsumerService {
         }
 
         String sesCode = feignUtil.getSesCode(applicationId);
-        log.info("Received sesCode: {}", sesCode);
+        log.info("Received sesCode from deal-ms: {}", sesCode);
 
         String email = getEmailFromJsonString(message);
 
@@ -79,7 +79,7 @@ public class KafkaConsumerService {
 
     @KafkaListener(topics = "${kafka.topic.creditIssued}" , groupId = "${kafka.producer.groupId}",  containerFactory = "kafkaListenerContainerFactory")
     public void listenCreditIssued(String message) {
-        log.info("Received Message: {} from credit-issued", message);
+        log.info("Received Message from credit-issued: {} ", message);
 
         Long applicationId = getApplicationIdFromJsonString(message);
         if (applicationId == null){
@@ -96,7 +96,7 @@ public class KafkaConsumerService {
 
     @KafkaListener(topics = "${kafka.topic.applicationDenied}" , groupId = "${kafka.producer.groupId}",  containerFactory = "kafkaListenerContainerFactory")
     public void listenApplicationDenied(String message) {
-        log.info("Received Message: {} from application-denied", message);
+        log.info("Received Message from application-denied: {}", message);
 
         Long applicationId = getApplicationIdFromJsonString(message);
         if (applicationId == null){

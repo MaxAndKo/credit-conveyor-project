@@ -175,25 +175,22 @@ public class DealServiceImpl implements DealService {
     }
 
     @Override
+    @Transactional
     public void documentCode(Long applicationId, String code) {
         Application application = findApplicationOrThrowException(applicationId);
         if (application.getSesCode().equals(code)) {
             application.setStatus(ApplicationStatus.DOCUMENT_SIGNED);
-            creditIssued(applicationId);
+            application.setSingDate(LocalDate.now());
+
+            application.setStatus(ApplicationStatus.CREDIT_ISSUED);
+            kafkaProducerService.sendCreditIssued(
+                    new EmailMessageDTO(
+                            application.getClient().getEmail(),
+                            Theme.CREDIT_ISSUED,
+                            application.getId()));
         } else {
             throw new ApplicationException("Неверный код");
         }
-    }
-
-    @Transactional
-    void creditIssued(Long applicationId) {
-        Application application = findApplicationOrThrowException(applicationId);
-        application.setStatus(ApplicationStatus.CREDIT_ISSUED);
-        kafkaProducerService.sendCreditIssued(
-                new EmailMessageDTO(
-                        application.getClient().getEmail(),
-                        Theme.CREDIT_ISSUED,
-                        application.getId()));
     }
 
     @Override
@@ -209,6 +206,18 @@ public class DealServiceImpl implements DealService {
         );
     }
 
+    @Override
+    public Application findApplication(Long applicationId){
+        Application application = applicationService.findById(applicationId);
+        log.info("Found application: {}", application);
+        return application;
+    }
+
+    @Override
+    public List<Application> findAllApplications(){
+        return applicationService.findAll();
+    }
+
     @Transactional
     Application findApplicationOrThrowException(Long applicationId) throws ApplicationException {
         log.info("Received application id = {}", applicationId);
@@ -221,6 +230,7 @@ public class DealServiceImpl implements DealService {
             return application;
         }
     }
+
 
     private String correctMessage(String message) {
         int startOfError = message.indexOf("error") + 8;

@@ -1,6 +1,7 @@
 package com.konchalovmaxim.dealms.entity;
 
 import com.konchalovmaxim.dealms.dto.PaymentScheduleElementDTO;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
@@ -10,6 +11,7 @@ import java.time.LocalDate;
 @Entity
 @Table(name = "t_payment_schedule_elements")
 @NoArgsConstructor
+@Getter
 public class PaymentScheduleElement {
     @Id
     @GeneratedValue(generator = "payment_id_sequence")

@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -32,5 +33,10 @@ public class ApplicationServiceImpl implements ApplicationService {
         Application founded = optional.orElse(null);
         log.debug("Founded application: {}", founded);
         return founded;
+    }
+
+    @Override
+    public List<Application> findAll(){
+        return repository.findAll();
     }
 }

@@ -1,11 +1,13 @@
 package com.konchalovmaxim.dealms.controller;
 
 import com.konchalovmaxim.dealms.dto.*;
+import com.konchalovmaxim.dealms.entity.Application;
 import com.konchalovmaxim.dealms.service.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import javax.transaction.Transactional;
 import javax.validation.Valid;
 import java.util.List;
 
@@ -63,6 +65,17 @@ public class DealController {
     @PutMapping("/application/{applicationId}")
     public void clientCanceledApplication(@PathVariable("applicationId") Long applicationId){
         dealService.clientCanceledApplication(applicationId);
+    }
+
+    @GetMapping("/admin/application/{applicationId}")
+    @Transactional
+    public Application findApplicationById(@PathVariable("applicationId") Long applicationId){
+        return dealService.findApplication(applicationId);
+    }
+
+    @GetMapping("/admin/application")
+    public List<Application> findAllApplications(){
+        return dealService.findAllApplications();
     }
 
 }
