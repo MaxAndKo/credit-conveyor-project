@@ -180,9 +180,11 @@ public class DealServiceImpl implements DealService {
         Application application = findApplicationOrThrowException(applicationId);
         if (application.getSesCode().equals(code)) {
             application.setStatus(ApplicationStatus.DOCUMENT_SIGNED);
+            log.debug("Application status set on: {}", application.getStatus());
             application.setSingDate(LocalDate.now());
 
             application.setStatus(ApplicationStatus.CREDIT_ISSUED);
+            log.debug("Application status set on: {}", application.getStatus());
             kafkaProducerService.sendCreditIssued(
                     new EmailMessageDTO(
                             application.getClient().getEmail(),
@@ -197,6 +199,7 @@ public class DealServiceImpl implements DealService {
     public void clientCanceledApplication(Long applicationId) {
         Application application = findApplicationOrThrowException(applicationId);
         application.setStatus(ApplicationStatus.CLIENT_DENIED);
+        log.debug("Application status set on: {}", application.getStatus());
         kafkaProducerService.sendApplicationDenied(
                 new EmailMessageDTO(
                         application.getClient().getEmail(),
@@ -207,14 +210,15 @@ public class DealServiceImpl implements DealService {
     }
 
     @Override
-    public Application findApplication(Long applicationId){
+    public Application findApplication(Long applicationId) {
         Application application = applicationService.findById(applicationId);
         log.info("Found application: {}", application);
         return application;
     }
 
     @Override
-    public List<Application> findAllApplications(){
+    public List<Application> findAllApplications() {
+        log.info("Finding all applications");
         return applicationService.findAll();
     }
 
