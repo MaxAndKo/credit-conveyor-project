@@ -3,10 +3,7 @@ package com.konchalovmaxim.dealms.entity;
 import com.konchalovmaxim.dealms.dto.EmploymentDTO;
 import com.konchalovmaxim.dealms.enums.EmploymentPosition;
 import com.konchalovmaxim.dealms.enums.EmploymentStatus;
-import lombok.Data;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
@@ -16,6 +13,7 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @Getter
 @Setter
+@ToString
 public class Employment {
     @Id
     @GeneratedValue(generator = "employment_id_sequence")

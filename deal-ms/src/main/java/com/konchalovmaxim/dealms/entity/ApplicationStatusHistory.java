@@ -5,6 +5,7 @@ import com.konchalovmaxim.dealms.enums.ChangeType;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 import javax.persistence.*;
 import java.time.LocalDate;
@@ -14,6 +15,7 @@ import java.time.LocalDate;
 @Setter
 @Getter
 @NoArgsConstructor
+@ToString(exclude = "application")
 public class ApplicationStatusHistory {
     @Id
     @GeneratedValue(generator = "application_status_history_id_sequence")
@@ -25,7 +27,7 @@ public class ApplicationStatusHistory {
     private LocalDate time;
     @Enumerated(value = EnumType.STRING)
     private ChangeType changeType;
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne
     @JoinColumn(name = "application_id")
     private Application application;
 

@@ -1,10 +1,13 @@
 package com.konchalovmaxim.dealms.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.konchalovmaxim.dealms.enums.ApplicationStatus;
 import com.konchalovmaxim.dealms.enums.ChangeType;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 import javax.persistence.*;
 import java.time.LocalDate;
@@ -16,6 +19,7 @@ import java.util.List;
 @NoArgsConstructor
 @Getter
 @Setter
+@ToString
 public class Application {
     @Id
     @GeneratedValue(generator = "application_id_sequence")
@@ -36,6 +40,7 @@ public class Application {
     private LocalDate singDate;
     private String sesCode;
     @OneToMany(mappedBy = "application", cascade = CascadeType.ALL)
+    @JsonIgnore
     private List<ApplicationStatusHistory> statusHistories;
 
     public void setStatus(ApplicationStatus status, ChangeType changeType) {

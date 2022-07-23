@@ -1,9 +1,7 @@
 package com.konchalovmaxim.dealms.service;
 
-import com.konchalovmaxim.dealms.dto.DocumentDTO;
-import com.konchalovmaxim.dealms.dto.FinishRegistrationRequestDTO;
-import com.konchalovmaxim.dealms.dto.LoanApplicationRequestDTO;
-import com.konchalovmaxim.dealms.dto.LoanOfferDTO;
+import com.konchalovmaxim.dealms.dto.*;
+import com.konchalovmaxim.dealms.entity.Application;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -26,4 +24,8 @@ public interface DealService {
     void documentCode(Long applicationId, String code);
 
     void clientCanceledApplication(Long applicationId);
+
+    Application findApplication(Long applicationId);
+
+    List<Application> findAllApplications();
 }
